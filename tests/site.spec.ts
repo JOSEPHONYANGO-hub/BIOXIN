@@ -1,0 +1,96 @@
+import AxeBuilder from '@axe-core/playwright'
+import { expect, test } from '@playwright/test'
+
+const pages = [
+  '/',
+  '/hair-care',
+  '/skin-care',
+  '/supplements',
+  '/hair-care/forte',
+  '/hair-care/forte/forte-serum',
+  '/hair-care/black-garlic/black-garlic-shampoo',
+  '/about',
+  '/science',
+  '/contact',
+  '/partners/pharmacies',
+  '/partners/distributors',
+  '/privacy',
+  '/cookies',
+  '/terms',
+]
+
+for (const path of pages) {
+  test(`${path} loads, has one h1, no horizontal overflow and no serious accessibility issues`, async ({ page }) => {
+    const res = await page.goto(path)
+    expect(res?.status()).toBe(200)
+    await expect(page.locator('h1')).toHaveCount(1)
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
+    // axe-core/playwright is typed against an older Playwright; the page object is compatible at runtime.
+    const results = await new AxeBuilder({ page: page as unknown as ConstructorParameters<typeof AxeBuilder>[0]['page'] }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()
+    const serious = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
+    expect(serious.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([])
+  })
+}
+
+test('unknown pages return 404', async ({ page }) => {
+  const res = await page.goto('/hair-care/not-a-family')
+  expect(res?.status()).toBe(404)
+})
+
+test('Buy now appears only for products the shop sells, without naming the shop', async ({ page }) => {
+  await page.goto('/hair-care/forte/forte-serum')
+  const buy = page.getByRole('link', { name: /Buy now/ })
+  await expect(buy).toHaveCount(1)
+  await expect(buy).toHaveAttribute('href', /^https:\/\/eloriabeauty\.co\.ke\/products\/bioxcin-forte-serum-50-ml\?utm_source=bioxcin\.co\.ke/)
+  await expect(buy).not.toContainText(/eloria/i)
+
+  await page.goto('/hair-care/black-garlic/black-garlic-shampoo')
+  await expect(page.getByRole('link', { name: /Buy now/ })).toHaveCount(0)
+  // No "ask us" prompt or any other link takes the place of the button.
+  await expect(page.locator('main')).not.toContainText(/whatsapp/i)
+})
+
+test('navigation menu works with the keyboard', async ({ page }, info) => {
+  await page.goto('/')
+  if (info.project.name === 'desktop-1440') {
+    const trigger = page.getByRole('button', { name: 'Hair care' })
+    await trigger.click()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    await expect(page.getByRole('link', { name: /Forte/ }).first()).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await expect(trigger).toBeFocused()
+  } else {
+    const menu = page.getByRole('button', { name: 'Menu' })
+    await menu.click()
+    await expect(page.getByRole('button', { name: 'Close' })).toHaveAttribute('aria-expanded', 'true')
+    await page.locator('summary', { hasText: 'Skin care' }).click()
+    await expect(page.getByRole('link', { name: 'Hydra' }).last()).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('button', { name: 'Menu' })).toBeFocused()
+  }
+})
+
+test('enquiry form shows accessible errors, then accepts a valid submission', async ({ page }) => {
+  await page.goto('/partners/pharmacies')
+  await page.waitForTimeout(2800) // the form rejects submissions faster than a person could type
+  await page.getByRole('button', { name: 'Send enquiry' }).click()
+  await expect(page.getByRole('alert').filter({ hasText: 'Please check the highlighted fields' })).toBeVisible()
+  await expect(page.getByLabel('Business name')).toHaveAttribute('aria-invalid', 'true')
+
+  await page.getByLabel('Business name').fill('Test Pharmacy')
+  await page.getByLabel('Type of business').selectOption('Pharmacy')
+  await page.getByLabel('Town or county').fill('Nairobi')
+  await page.getByLabel('Contact person').fill('Jane Test')
+  await page.getByLabel('Phone number').fill('0712 345 678')
+  await page.getByLabel('Email address').fill('jane@example.com')
+  await page.getByRole('checkbox').check()
+  await page.getByRole('button', { name: 'Send enquiry' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'received your enquiry' })).toBeVisible()
+})
+
+test('health check responds', async ({ request }) => {
+  const res = await request.get('/healthz')
+  expect(res.status()).toBe(200)
+})

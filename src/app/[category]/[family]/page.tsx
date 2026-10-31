@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { accentStyles, ProductGrid } from '@/components/catalog/Catalog'
-import { ArrowLink, cx, PageHeader, PendingNotice, Section } from '@/components/ui'
+import { ArrowLink, cx, PageHeader, Section } from '@/components/ui'
 import { categories, getCategory, getFamily, productsIn } from '@/lib/catalog'
 import { pageMeta } from '@/lib/seo'
 
@@ -41,16 +41,14 @@ export default async function FamilyPage({ params }: Params) {
       <PageHeader
         eyebrow={family.focus ?? category.name}
         title={`Bioxcin ${family.name}`}
+        intro={family.description}
         crumbs={[{ label: 'Home', href: '/' }, { label: category.name, href: `/${category.slug}` }, { label: family.name }]}
       />
       <Section aria-label={`${family.name} products`}>
-        <div className="mb-8">
-          <PendingNotice>The approved description of the {family.name} range will be added in the next phase.</PendingNotice>
-        </div>
         {items.length ? (
           <ProductGrid products={items} />
         ) : (
-          <p className="text-muted">Products in this range will be listed soon.</p>
+          <p className="text-muted">Products in this range are coming soon.</p>
         )}
         <div className="mt-10">
           <ArrowLink href={`/${category.slug}`}>All {category.name.toLowerCase()}</ArrowLink>

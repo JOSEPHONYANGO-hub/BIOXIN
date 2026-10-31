@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { categories } from '@/lib/catalog'
-import { approvedSocialLinks, contact, footerLinks, operatorName, partnerNav, shown } from '@/lib/site'
+import { announcement, approvedSocialLinks, contact, footerLinks, operatorName, partnerNav, shown } from '@/lib/site'
 import { Icon, type IconName } from '../Icon'
 import { Container } from '../ui'
-import { Wordmark } from './Header'
+import { Logo } from './Header'
 
 const socialIcon: Record<string, IconName> = { Facebook: 'facebook', Instagram: 'instagram', TikTok: 'tiktok' }
 
@@ -27,18 +27,19 @@ export function SocialLinks({ className = '' }: { className?: string }) {
   )
 }
 
-/** Slim contact bar above the header: phone, WhatsApp and opening hours. */
+/** Announcement bar above the header, with phone, WhatsApp and opening hours on wider screens. */
 export function UtilityBar() {
   const phone = shown(contact.phone)
   const whatsapp = shown(contact.whatsapp)
   const hours = shown(contact.hours)
   return (
-    <div className="bg-brand-dark text-xs text-white">
-      <Container className="flex min-h-10 items-center justify-between gap-4">
+    <div className="bg-brand text-xs text-white">
+      <Container className="flex min-h-10 flex-wrap items-center justify-center gap-x-6 gap-y-1 py-1.5 md:justify-between">
+        <p className="text-center font-semibold tracking-wide">{announcement}</p>
         <ul className="flex items-center gap-4 sm:gap-6">
           {phone ? (
             <li>
-              <a href={contact.phoneHref} className="flex min-h-10 items-center gap-1.5 hover:underline">
+              <a href={contact.phoneHref} className="flex min-h-8 items-center gap-1.5 hover:underline">
                 <Icon name="phone" className="size-4" />
                 <span className="sr-only">Call us on </span>
                 {phone}
@@ -47,19 +48,19 @@ export function UtilityBar() {
           ) : null}
           {whatsapp ? (
             <li>
-              <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center gap-1.5 hover:underline">
+              <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" className="flex min-h-8 items-center gap-1.5 hover:underline">
                 <Icon name="whatsapp" className="size-4" />
                 WhatsApp<span className="sr-only"> (opens in a new tab)</span>
               </a>
             </li>
           ) : null}
+          {hours ? (
+            <li className="hidden items-center gap-1.5 lg:flex">
+              <Icon name="clock" className="size-4" />
+              Mon to Sat, 8am to 5pm
+            </li>
+          ) : null}
         </ul>
-        {hours ? (
-          <p className="hidden items-center gap-1.5 md:flex">
-            <Icon name="clock" className="size-4" />
-            {hours}
-          </p>
-        ) : null}
       </Container>
     </div>
   )
@@ -75,7 +76,7 @@ export function Footer() {
     <footer className="bg-brand text-white">
       <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <Wordmark onDark />
+          <Logo onDark className="inline-flex" />
           <p className="mt-4 max-w-sm text-sm text-white/85">
             Hair care, skin care and beauty supplements, brought to Kenya by {operatorName}.
           </p>

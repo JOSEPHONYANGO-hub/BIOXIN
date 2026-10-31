@@ -27,7 +27,10 @@ export const viewport: Viewport = {
 const menuCategories = categories.map((c) => ({
   slug: c.slug,
   name: c.name,
-  families: c.families.map((f) => ({ slug: f.slug, name: f.name, focus: f.focus })),
+  image: c.image,
+  needs: c.needs,
+  types: c.types,
+  families: c.families.map((f) => ({ slug: f.slug, name: f.name, focus: f.focus, accent: f.accent })),
 }))
 
 const organization = {

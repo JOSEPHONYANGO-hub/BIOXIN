@@ -1,15 +1,21 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Icon } from '../Icon'
 import { cx } from '../ui'
 
+type Facet = { slug: string; name: string }
+
 export type MenuCategory = {
   slug: string
   name: string
-  families: Array<{ slug: string; name: string; focus?: string }>
+  image: string
+  needs: Facet[]
+  types: Facet[]
+  families: Array<{ slug: string; name: string; focus?: string; accent: string }>
 }
 
 type Props = {
@@ -23,16 +29,21 @@ const simpleLinks = [
   { label: 'Contact', href: '/contact' },
 ]
 
-export function Wordmark({ onDark }: { onDark?: boolean }) {
-  // Text wordmark until the official Bioxcin logo files are supplied; it is not a redesigned logo.
+/** Official Bioxcin logo (brand asset). On dark backgrounds it sits on a white chip. */
+export function Logo({ onDark, className }: { onDark?: boolean; className?: string }) {
   return (
-    <span className="flex items-baseline gap-2 leading-none">
-      <span className={cx('text-2xl font-extrabold tracking-[0.12em]', onDark ? 'text-white' : 'text-brand')}>BIOXCIN</span>
-      <span className={cx('text-xs font-semibold tracking-[0.2em] uppercase', onDark ? 'text-accent-light' : 'text-accent-ink')}>
-        Kenya
-      </span>
+    <span className={cx('flex items-center', onDark && 'rounded-md bg-white px-3 py-2', className)}>
+      <Image src="/images/logo.svg" alt="Bioxcin Kenya home" width={293} height={86} priority className="h-9 w-auto sm:h-11" />
     </span>
   )
+}
+
+const accentDot: Record<string, string> = {
+  forte: 'bg-forte',
+  collagen: 'bg-collagen',
+  keratin: 'bg-keratin',
+  hydra: 'bg-hydra',
+  brand: 'bg-brand',
 }
 
 export function Header({ categories, partners }: Props) {
@@ -92,10 +103,10 @@ export function Header({ categories, partners }: Props) {
   ]
 
   return (
-    <div ref={navRef} className="relative border-b border-line bg-white">
+    <div ref={navRef} className="relative bg-white shadow-[0_2px_12px_rgba(0,59,115,0.08)]">
       <div ref={bar} className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:h-20 sm:px-6 lg:px-8">
         <Link href="/" className="shrink-0">
-          <Wordmark />
+          <Logo />
         </Link>
 
         <nav aria-label="Main" className="hidden lg:block">
@@ -162,28 +173,42 @@ export function Header({ categories, partners }: Props) {
           key={d.key}
           id={`${baseId}-${d.key}-panel`}
           hidden={open !== d.key}
-          className="absolute inset-x-0 top-full z-40 border-b border-line bg-white shadow-xl"
+          className="absolute inset-x-0 top-full z-40 border-t border-line bg-white shadow-xl"
         >
-          <div className="mx-auto max-w-7xl px-8 py-8">
+          <div className="mx-auto max-w-7xl px-8 py-7">
             {d.category ? (
-              <div className="grid grid-cols-4 gap-8">
-                <div>
-                  <p className="text-xs font-semibold tracking-[0.14em] text-accent-ink uppercase">{d.category.name}</p>
-                  <Link href={d.href} className="mt-3 inline-flex items-center gap-1.5 text-lg font-bold text-brand hover:underline">
+              <div className="grid grid-cols-12 gap-8">
+                <MenuColumn title="Needs" className="col-span-3">
+                  {d.category.needs.map((n) => (
+                    <MenuLink key={n.slug} href={`/${d.category!.slug}?need=${n.slug}`}>
+                      {n.name}
+                    </MenuLink>
+                  ))}
+                </MenuColumn>
+                <MenuColumn title="Product types" className="col-span-2">
+                  {d.category.types.map((t) => (
+                    <MenuLink key={t.slug} href={`/${d.category!.slug}?type=${t.slug}`}>
+                      {t.name}
+                    </MenuLink>
+                  ))}
+                </MenuColumn>
+                <MenuColumn title="Product families" className="col-span-4" columns>
+                  {d.category.families.map((f) => (
+                    <MenuLink key={f.slug} href={`/${d.category!.slug}/${f.slug}`}>
+                      <span className={cx('mr-2 inline-block size-2 rounded-full', accentDot[f.accent] ?? 'bg-brand')} aria-hidden="true" />
+                      {f.name}
+                    </MenuLink>
+                  ))}
+                </MenuColumn>
+                <Link href={d.href} className="group col-span-3 overflow-hidden rounded-xl bg-surface">
+                  <span className="relative block aspect-[4/3]">
+                    <Image src={d.category.image} alt="" fill sizes="20vw" className="object-cover transition-transform group-hover:scale-105" />
+                  </span>
+                  <span className="flex items-center justify-between gap-2 p-4 font-semibold text-brand">
                     View all {d.category.name.toLowerCase()}
                     <Icon name="arrowRight" className="size-4" />
-                  </Link>
-                </div>
-                <ul className="col-span-3 grid grid-cols-3 gap-x-8 gap-y-1">
-                  {d.category.families.map((f) => (
-                    <li key={f.slug}>
-                      <Link href={`/${d.category!.slug}/${f.slug}`} className="block rounded-md px-3 py-2 hover:bg-surface">
-                        <span className="block text-sm font-semibold text-brand">{f.name}</span>
-                        {f.focus ? <span className="block text-xs text-muted">{f.focus}</span> : null}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                  </span>
+                </Link>
               </div>
             ) : (
               <div className="grid grid-cols-4 gap-8">
@@ -230,10 +255,20 @@ export function Header({ categories, partners }: Props) {
                         View all {c.name.toLowerCase()}
                       </Link>
                     </li>
+                    <li className="min-[420px]:col-span-2 px-3 pt-2 text-xs font-semibold tracking-[0.14em] text-accent-ink uppercase">Product families</li>
                     {c.families.map((f) => (
                       <li key={f.slug}>
-                        <Link href={`/${c.slug}/${f.slug}`} className="block rounded-md px-3 py-2.5 text-sm text-ink hover:bg-surface">
+                        <Link href={`/${c.slug}/${f.slug}`} className="flex items-center rounded-md px-3 py-2.5 text-sm text-ink hover:bg-surface">
+                          <span className={cx('mr-2 inline-block size-2 rounded-full', accentDot[f.accent] ?? 'bg-brand')} aria-hidden="true" />
                           {f.name}
+                        </Link>
+                      </li>
+                    ))}
+                    <li className="min-[420px]:col-span-2 px-3 pt-3 text-xs font-semibold tracking-[0.14em] text-accent-ink uppercase">Needs</li>
+                    {c.needs.map((n) => (
+                      <li key={n.slug}>
+                        <Link href={`/${c.slug}?need=${n.slug}`} className="block rounded-md px-3 py-2.5 text-sm text-ink hover:bg-surface">
+                          {n.name}
                         </Link>
                       </li>
                     ))}
@@ -269,5 +304,24 @@ export function Header({ categories, partners }: Props) {
         </nav>
       </div>
     </div>
+  )
+}
+
+function MenuColumn({ title, className, columns, children }: { title: string; className?: string; columns?: boolean; children: React.ReactNode }) {
+  return (
+    <div className={className}>
+      <p className="mb-2 border-b border-line pb-2 text-xs font-semibold tracking-[0.14em] text-accent-ink uppercase">{title}</p>
+      <ul className={cx(columns && 'grid grid-cols-2 gap-x-4')}>{children}</ul>
+    </div>
+  )
+}
+
+function MenuLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <li>
+      <Link href={href} className="flex items-center rounded-md px-2 py-1.5 text-sm text-ink hover:bg-surface hover:text-brand">
+        {children}
+      </Link>
+    </li>
   )
 }

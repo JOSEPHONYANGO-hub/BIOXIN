@@ -78,3 +78,18 @@ export const footerLinks: NavItem[] = [
   { label: 'Cookie policy', href: '/cookies' },
   { label: 'Terms of use', href: '/terms' },
 ]
+
+/** Announcement shown above the header on every page. */
+export const announcement = `${siteName} | Marketed & Distributed by ${operatorName}`
+
+/**
+ * Which purchase buttons product pages show:
+ * - 'both': "Buy now" where the shop sells the product, plus a WhatsApp enquiry on every product
+ * - 'whatsapp': only the WhatsApp enquiry
+ * - 'buy': only "Buy now", and nothing for products the shop does not sell
+ */
+export const productCta: 'both' | 'whatsapp' | 'buy' = 'both'
+
+/** Pre-filled WhatsApp enquiry about one product. */
+export const whatsappEnquiryLink = (productName: string) =>
+  `${contact.whatsappHref}?text=${encodeURIComponent(`Hi ${operatorName}, I would like to inquire about Bioxcin ${productName}`)}`

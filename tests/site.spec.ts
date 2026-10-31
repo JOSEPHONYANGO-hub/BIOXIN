@@ -7,8 +7,11 @@ const pages = [
   '/skin-care',
   '/supplements',
   '/hair-care/forte',
+  '/hair-care?need=volume',
   '/hair-care/forte/forte-serum',
   '/hair-care/black-garlic/black-garlic-shampoo',
+  '/skin-care/hydra/hydra-toner',
+  '/skin-care/sun-care',
   '/about',
   '/science',
   '/contact',
@@ -47,8 +50,34 @@ test('Buy now appears only for products the shop sells, without naming the shop'
 
   await page.goto('/hair-care/black-garlic/black-garlic-shampoo')
   await expect(page.getByRole('link', { name: /Buy now/ })).toHaveCount(0)
-  // No "ask us" prompt or any other link takes the place of the button.
-  await expect(page.locator('main')).not.toContainText(/whatsapp/i)
+})
+
+test('product pages offer a pre-filled WhatsApp enquiry', async ({ page }) => {
+  await page.goto('/hair-care/black-garlic/black-garlic-shampoo')
+  const wa = page.getByRole('link', { name: /Enquire on WhatsApp/ })
+  await expect(wa).toHaveCount(1)
+  const href = await wa.getAttribute('href')
+  expect(href).toMatch(/^https:\/\/wa\.me\/254793200000\?text=/)
+  expect(decodeURIComponent(href!.split('text=')[1])).toBe('Hi Eloria Beauty, I would like to inquire about Bioxcin Black Garlic Shampoo')
+})
+
+test('product tabs switch with the keyboard', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile-360', 'phones show an accordion instead')
+  await page.goto('/hair-care/collagen-biotin/collagen-biotin-shampoo')
+  const first = page.getByRole('tab', { name: 'Active ingredients' })
+  await first.click()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('tab', { name: 'How to use' })).toHaveAttribute('aria-selected', 'true')
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('tabpanel')).toContainText('98% volume')
+})
+
+test('category filters narrow the product list', async ({ page }) => {
+  await page.goto('/skin-care?need=sun-protection')
+  await expect(page.getByRole('heading', { level: 2, name: 'Sun protection' })).toBeVisible()
+  const cards = page.locator('#products article')
+  expect(await cards.count()).toBeGreaterThan(0)
+  for (const name of await cards.locator('h3').allTextContents()) expect(name).toMatch(/Sun/)
 })
 
 test('navigation menu works with the keyboard', async ({ page }, info) => {

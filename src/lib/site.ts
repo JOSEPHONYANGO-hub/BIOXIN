@@ -54,8 +54,6 @@ export const approvedSocialLinks = socialLinks.filter((s) => s.approved)
 /** Where each enquiry type is delivered. All go to one inbox for now; split later if needed. */
 export const enquiryRecipients = {
   contact: process.env.ENQUIRY_TO || 'info@eloriabeauty.co.ke',
-  pharmacy: process.env.ENQUIRY_TO || 'info@eloriabeauty.co.ke',
-  distributor: process.env.ENQUIRY_TO || 'info@eloriabeauty.co.ke',
 }
 
 /** Purchase links go to the retail shop; the source tag lets the shop see sales from this site. */
@@ -65,10 +63,6 @@ export const buyLink = (shopSlug: string) =>
 
 export type NavItem = { label: string; href: string; description?: string; children?: NavItem[] }
 
-export const partnerNav: NavItem[] = [
-  { label: 'Pharmacies & retailers', href: '/partners/pharmacies', description: 'Stock Bioxcin in your pharmacy or shop' },
-  { label: 'Distributors & wholesale', href: '/partners/distributors', description: 'Regional distribution and bulk supply' },
-]
 
 export const footerLinks: NavItem[] = [
   { label: 'About Bioxcin', href: '/about' },

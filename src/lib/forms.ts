@@ -1,7 +1,7 @@
 import 'server-only'
 import { headers } from 'next/headers'
 import { z } from 'zod'
-import { businessTypes, contactSubjects } from './form-options'
+import { contactSubjects } from './form-options'
 import { rateLimit } from './rate-limit'
 
 /** Common checks for every public form: honeypot, timing and a per-IP rate limit. */
@@ -65,17 +65,5 @@ export const contactSchema = z.object({
   message: z.string().trim().min(5, 'Enter your message').max(2000, 'Keep your message under 2,000 characters'),
 })
 
-export const pharmacySchema = z.object({
-  ...base,
-  businessName: line('your business name'),
-  businessType: z.enum(businessTypes, { error: 'Choose your type of business' }),
-  location: line('your town or county'),
-})
 
-export const distributorSchema = z.object({
-  ...base,
-  companyName: line('your company name'),
-  regions: line('the regions you cover', 2, 200),
-})
-
-export type EnquiryKind = 'contact' | 'pharmacy' | 'distributor'
+export type EnquiryKind = 'contact'

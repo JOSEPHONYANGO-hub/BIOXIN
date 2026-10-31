@@ -20,7 +20,6 @@ export type MenuCategory = {
 
 type Props = {
   categories: MenuCategory[]
-  partners: Array<{ label: string; href: string; description?: string }>
 }
 
 const simpleLinks = [
@@ -45,7 +44,7 @@ const accentDot: Record<string, string> = {
   brand: 'bg-brand',
 }
 
-export function Header({ categories, partners }: Props) {
+export function Header({ categories }: Props) {
   const pathname = usePathname()
   const [open, setOpen] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -98,7 +97,6 @@ export function Header({ categories, partners }: Props) {
 
   const dropdowns = [
     ...categories.map((c) => ({ key: c.slug, label: c.name, href: `/${c.slug}`, category: c })),
-    { key: 'partners', label: 'For business', href: '/partners/pharmacies', category: null },
   ]
 
   return (
@@ -122,7 +120,7 @@ export function Header({ categories, partners }: Props) {
                     onClick={() => setOpen(expanded ? null : d.key)}
                     className={cx(
                       'flex min-h-11 items-center gap-1 rounded-md px-3 text-sm font-semibold transition-colors hover:bg-surface',
-                      d.key === 'partners' ? 'text-accent-ink' : 'text-brand',
+                      'text-brand',
                       (expanded || (d.category && isActive(d.href))) && 'bg-surface',
                     )}
                   >
@@ -209,24 +207,7 @@ export function Header({ categories, partners }: Props) {
                   </span>
                 </Link>
               </div>
-            ) : (
-              <div className="grid grid-cols-4 gap-8">
-                <div>
-                  <p className="text-xs font-semibold tracking-[0.14em] text-accent-ink uppercase">For business</p>
-                  <p className="mt-3 text-sm text-muted">Partner with Bioxcin in Kenya.</p>
-                </div>
-                <ul className="col-span-3 grid grid-cols-2 gap-6">
-                  {partners.map((p) => (
-                    <li key={p.href}>
-                      <Link href={p.href} className="block rounded-lg border border-line p-5 hover:border-brand hover:bg-surface">
-                        <span className="block font-semibold text-brand">{p.label}</span>
-                        {p.description ? <span className="mt-1 block text-sm text-muted">{p.description}</span> : null}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
       ))}
@@ -287,19 +268,6 @@ export function Header({ categories, partners }: Props) {
               </li>
             ))}
           </ul>
-          <div className="mt-6 rounded-xl bg-brand p-5 text-white">
-            <p className="text-xs font-semibold tracking-[0.14em] text-accent-light uppercase">For business</p>
-            <ul className="mt-3 space-y-2">
-              {partners.map((p) => (
-                <li key={p.href}>
-                  <Link href={p.href} className="flex min-h-11 items-center justify-between font-semibold">
-                    {p.label}
-                    <Icon name="arrowRight" className="size-4" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
         </nav>
       </div>
     </div>

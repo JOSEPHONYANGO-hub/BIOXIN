@@ -5,7 +5,7 @@ import { Footer, UtilityBar } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { JsonLd } from '@/components/JsonLd'
 import { categories } from '@/lib/catalog'
-import { approvedSocialLinks, contact, isProduction, partnerNav, seoDefaults, shown, siteName, siteUrl } from '@/lib/site'
+import { approvedSocialLinks, contact, isProduction, seoDefaults, shown, siteName, siteUrl } from '@/lib/site'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : null}
         <UtilityBar />
         <header className="sticky top-0 z-40">
-          <Header categories={menuCategories} partners={partnerNav} />
+          <Header categories={menuCategories} />
         </header>
         <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
           {children}

@@ -2,37 +2,25 @@
 
 import {
   contactSchema,
-  distributorSchema,
   fieldErrors,
   guard,
-  pharmacySchema,
   type EnquiryKind,
   type FormState,
 } from '@/lib/forms'
 import { sendEnquiryEmail } from '@/lib/mailer'
 import { contact, enquiryRecipients, shown } from '@/lib/site'
 
-const schemas = { contact: contactSchema, pharmacy: pharmacySchema, distributor: distributorSchema }
+const schemas: Record<EnquiryKind, typeof contactSchema> = { contact: contactSchema }
 
 const labels: Record<string, string> = {
   name: 'Name',
   email: 'Email',
   phone: 'Phone',
   subject: 'Subject',
-  businessName: 'Business name',
-  businessType: 'Business type',
-  location: 'Town / county',
-  companyName: 'Company',
-  regions: 'Regions covered',
   message: 'Message',
 }
 
-const subjectFor = (kind: EnquiryKind, d: Record<string, string>) =>
-  kind === 'pharmacy'
-    ? `Pharmacy/retailer enquiry: ${d.businessName}`
-    : kind === 'distributor'
-      ? `Distributor enquiry: ${d.companyName}`
-      : `Website enquiry: ${d.subject}`
+const subjectFor = (_kind: EnquiryKind, d: Record<string, string>) => `Website enquiry: ${d.subject}`
 
 export async function submitEnquiry(_prev: FormState, form: FormData): Promise<FormState> {
   const kind = String(form.get('kind')) as EnquiryKind

@@ -7,46 +7,104 @@ import { Icon } from '@/components/Icon'
 import { Container, cx, Section, SectionHeading } from '@/components/ui'
 import { categories, findProduct, productHref, products } from '@/lib/catalog'
 import { pageMeta } from '@/lib/seo'
-import { partnerNav, seoDefaults } from '@/lib/site'
+import { seoDefaults } from '@/lib/site'
 
 export const metadata = pageMeta({ description: seoDefaults.description, path: '/' })
 
+const dims: Record<string, [number, number]> = {
+  'forte-shampoo': [599, 900],
+  'forte-serum': [290, 900],
+  'forte-serum-box': [900, 898],
+  'collagen-biotin-shampoo': [599, 900],
+  'collagen-biotin-conditioner': [343, 900],
+  'collagen-biotin-serum': [269, 900],
+  'keratin-argan-shampoo': [605, 900],
+  'keratin-argan-conditioner': [343, 900],
+  'keratin-argan-oil': [324, 900],
+  'age-reverse-gold-cream': [900, 755],
+  'age-reverse-serum': [339, 900],
+  'age-reverse-eye-cream': [238, 900],
+  'sun-cream-kids': [397, 900],
+  'sun-stick': [449, 900],
+}
+
+const pack = (file: string, alt: string) => ({ src: `/images/hero/${file}.webp`, alt, width: dims[file][0], height: dims[file][1] })
+
 const slides: Slide[] = [
   {
-    image: '/images/scenes/hero-forte.webp',
-    position: '70% center',
     eyebrow: 'Bioxcin Forte',
     title: 'Strong defence against hair loss',
-    text: 'Herbal care for intensive hair loss, with the patented BioComplex B11 formula and liposome technology.',
+    text: 'Herbal shampoo and serum for intensive hair loss, with the patented BioComplex B11 formula and liposome technology.',
     href: '/hair-care/forte',
     cta: 'Explore range',
+    panel: 'from-forte to-[#4a0000]',
+    stage: 'bg-gradient-to-br from-[#fbeeee] to-[#efd3d3]',
+    ctaText: 'text-forte',
+    badge: 'Fast effect',
+    products: [
+      pack('forte-shampoo', 'Bioxcin Forte Herbal Shampoo'),
+      pack('forte-serum', 'Bioxcin Forte Herbal Serum'),
+      pack('forte-serum-box', 'Bioxcin Forte Herbal Serum, 3 × 50 ml pack'),
+    ],
   },
   {
-    image: '/images/scenes/hair-swirl.webp',
-    position: '75% center',
-    eyebrow: 'Hair care',
-    title: 'Volume, repair and care for every hair type',
-    text: 'Collagen & Biotin for fullness, Keratin & Argan for damaged hair, and Nourishing Oils for dry hair.',
-    href: '/hair-care',
+    eyebrow: 'Bioxcin Collagen & Biotin',
+    title: 'Fuller, thicker-looking hair',
+    text: 'Volumising shampoo, conditioner and serum with collagen, biotin and Extra Volume technology.',
+    href: '/hair-care/collagen-biotin',
     cta: 'Explore range',
+    panel: 'from-collagen to-[#4b1f60]',
+    stage: 'bg-gradient-to-br from-[#f6effa] to-[#e5d3ee]',
+    ctaText: 'text-collagen',
+    badge: '98% volume',
+    products: [
+      pack('collagen-biotin-shampoo', 'Bioxcin Collagen & Biotin Volumising Shampoo'),
+      pack('collagen-biotin-conditioner', 'Bioxcin Collagen & Biotin Volumising Conditioner'),
+      pack('collagen-biotin-serum', 'Bioxcin Collagen & Biotin Volumising Hair Serum'),
+    ],
   },
   {
-    image: '/images/scenes/skin-mature.webp',
-    position: '80% 30%',
-    eyebrow: 'Age Reverse',
+    eyebrow: 'Bioxcin Keratin & Argan',
+    title: 'Repair for damaged hair',
+    text: 'Repairing shampoo, conditioner and hair oil with keratin, argan oil and Extra Repair technology.',
+    href: '/hair-care/keratin-argan',
+    cta: 'Explore range',
+    panel: 'from-keratin-ink to-[#3f3006]',
+    stage: 'bg-gradient-to-br from-[#fbf6e6] to-[#efe0b0]',
+    ctaText: 'text-keratin-ink',
+    badge: '94% repair',
+    products: [
+      pack('keratin-argan-shampoo', 'Bioxcin Keratin & Argan Repairing Shampoo'),
+      pack('keratin-argan-conditioner', 'Bioxcin Keratin & Argan Repairing Conditioner'),
+      pack('keratin-argan-oil', 'Bioxcin Keratin & Argan Repairing Hair Oil'),
+    ],
+  },
+  {
+    eyebrow: 'Bioxcin Age Reverse',
     title: 'Anti-wrinkle care for all skin types',
-    text: 'Filling and firming creams, serum and night eye cream.',
+    text: 'Filling and firming Gold Cream, Anti-Wrinkle Serum and Night Eye Cream.',
     href: '/skin-care/age-reverse',
     cta: 'Explore range',
+    panel: 'from-brand to-brand-dark',
+    stage: 'bg-gradient-to-br from-[#eef3fa] to-[#d3e0f0]',
+    ctaText: 'text-brand',
+    products: [
+      pack('age-reverse-gold-cream', 'Bioxcin Age Reverse Anti-Wrinkle Gold Cream'),
+      pack('age-reverse-serum', 'Bioxcin Age Reverse Anti-Wrinkle Serum'),
+      pack('age-reverse-eye-cream', 'Bioxcin Age Reverse Night Anti-Wrinkle Eye Cream'),
+    ],
   },
   {
-    image: '/images/scenes/hero-lab.webp',
-    position: '70% center',
-    eyebrow: 'Laboratories of dermocosmetic',
-    title: 'Science-led care for hair and skin',
-    text: 'Dermocosmetic formulas developed in the laboratory and tested on skin.',
-    href: '/hair-care',
+    eyebrow: 'Bioxcin Sun Care',
+    title: 'SPF 50+ for the whole family',
+    text: 'Very high protection for every skin type, from the easy-carry sun stick to mineral sun cream for children.',
+    href: '/skin-care/sun-care',
     cta: 'Explore range',
+    panel: 'from-[#c2410c] to-[#7c2d12]',
+    stage: 'bg-gradient-to-br from-[#fff6ec] to-[#ffe0bf]',
+    ctaText: 'text-[#9a3412]',
+    badge: 'SPF 50+',
+    products: [pack('sun-stick', 'Bioxcin Sun Care Stick SPF 50+'), pack('sun-cream-kids', 'Bioxcin Sun Care Kids Mineral Sun Cream SPF 50+')],
   },
 ]
 
@@ -252,38 +310,6 @@ export default function HomePage() {
         <ProductGrid products={featured} />
       </Section>
 
-      {/* Business band: visually distinct from consumer product discovery */}
-      <section aria-labelledby="business-heading" className="bg-brand-dark py-14 text-white sm:py-20">
-        <Container>
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-5">
-              <p className="mb-3 text-xs font-semibold tracking-[0.14em] text-accent-light uppercase">For business</p>
-              <h2 id="business-heading" className="text-3xl text-white sm:text-4xl">
-                Partner with Bioxcin in Kenya
-              </h2>
-              <p className="mt-4 text-lg text-white/85">
-                Pharmacies, retailers and distributors can enquire about stocking and supplying the Bioxcin range.
-              </p>
-            </div>
-            <ul className="grid gap-4 sm:grid-cols-2 lg:col-span-7">
-              {partnerNav.map((p) => (
-                <li key={p.href}>
-                  <Link
-                    href={p.href}
-                    className="flex h-full flex-col rounded-xl border border-white/20 p-6 transition-colors hover:border-accent hover:bg-white/5"
-                  >
-                    <span className="text-lg font-bold">{p.label}</span>
-                    <span className="mt-2 text-sm text-white/80">{p.description}</span>
-                    <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-light">
-                      Send an enquiry <Icon name="arrowRight" className="size-4" />
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Container>
-      </section>
     </>
   )
 }

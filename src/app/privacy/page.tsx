@@ -17,8 +17,8 @@ export default function PrivacyPage() {
       <p>This website is operated by {operatorName}, which brings the Bioxcin range to Kenya.</p>
       <h2>What we collect</h2>
       <p>
-        When you send a message or a business enquiry, we collect the details you enter in the form: your name, phone number, email
-        address, your message and, for business enquiries, your business name, type and location.
+        When you send us a message, we collect the details you enter in the form: your name, phone number, email
+        address and your message.
       </p>
       <h2>How we use it</h2>
       <p>We use these details only to reply to your message or enquiry. They are sent to our team by email.</p>

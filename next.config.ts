@@ -20,9 +20,10 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   async redirects() {
-    // /partners has no page of its own.
     return [
-      { source: '/partners', destination: '/partners/pharmacies', permanent: false },
+      // The business enquiry pages were removed on 31 Oct 2026.
+      { source: '/partners/:path*', destination: '/contact', permanent: true },
+      { source: '/partners', destination: '/contact', permanent: true },
       // The science page was removed on 31 Oct 2026.
       { source: '/science', destination: '/', permanent: true },
     ]

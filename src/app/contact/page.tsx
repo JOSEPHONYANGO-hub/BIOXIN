@@ -1,6 +1,6 @@
 import { ContactDetails } from '@/components/ContactDetails'
 import { EnquiryForm } from '@/components/forms/EnquiryForm'
-import { ArrowLink, Container, PageHeader } from '@/components/ui'
+import { Container, PageHeader } from '@/components/ui'
 import { pageMeta } from '@/lib/seo'
 
 export const metadata = pageMeta({
@@ -29,14 +29,6 @@ export default function ContactPage() {
             Get in touch
           </h2>
           <ContactDetails />
-          <div className="mt-8 rounded-xl border border-line p-6">
-            <p className="font-semibold text-brand">Are you a pharmacy, retailer or distributor?</p>
-            <p className="mt-1 text-sm text-muted">Use our business enquiry forms so the right team can reply.</p>
-            <div className="mt-4 flex flex-col gap-2">
-              <ArrowLink href="/partners/pharmacies">Pharmacies & retailers</ArrowLink>
-              <ArrowLink href="/partners/distributors">Distributors & wholesale</ArrowLink>
-            </div>
-          </div>
         </aside>
       </Container>
     </>

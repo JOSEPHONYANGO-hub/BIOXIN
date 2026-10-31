@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { startTransition, useActionState, useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { submitEnquiry } from '@/app/actions'
 import type { EnquiryKind, FormState } from '@/lib/forms'
-import { businessTypes, contactSubjects } from '@/lib/form-options'
+import { contactSubjects } from '@/lib/form-options'
 import { Icon } from '../Icon'
 import { buttonStyles, cx } from '../ui'
 
@@ -51,8 +51,6 @@ function Field({
 
 const submitLabel: Record<EnquiryKind, string> = {
   contact: 'Send message',
-  pharmacy: 'Send enquiry',
-  distributor: 'Send enquiry',
 }
 
 export function EnquiryForm({ kind }: { kind: EnquiryKind }) {
@@ -85,7 +83,7 @@ export function EnquiryForm({ kind }: { kind: EnquiryKind }) {
       <div ref={summaryRef} tabIndex={-1} role="status" className="rounded-xl border border-accent-ink/40 bg-accent/10 p-6">
         <p className="flex items-center gap-2 text-lg font-bold text-brand">
           <Icon name="check" className="size-6 text-accent-ink" />
-          Thank you, we&apos;ve received your {kind === 'contact' ? 'message' : 'enquiry'}.
+          Thank you, we&apos;ve received your message.
         </p>
         <p className="mt-2 text-ink">Our team will get back to you within working hours, Monday to Saturday.</p>
         {state.dryRun ? (
@@ -124,42 +122,8 @@ export function EnquiryForm({ kind }: { kind: EnquiryKind }) {
         </label>
       </div>
 
-      {kind === 'pharmacy' ? (
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Field name="businessName" label="Business name" error={errors.businessName}>
-            {(p) => <input {...p} type="text" autoComplete="organization" className={inputClass} />}
-          </Field>
-          <Field name="businessType" label="Type of business" error={errors.businessType}>
-            {(p) => (
-              <select {...p} defaultValue="" className={inputClass}>
-                <option value="" disabled>
-                  Choose one
-                </option>
-                {businessTypes.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            )}
-          </Field>
-          <Field name="location" label="Town or county" error={errors.location}>
-            {(p) => <input {...p} type="text" autoComplete="address-level2" className={inputClass} />}
-          </Field>
-        </div>
-      ) : null}
-
-      {kind === 'distributor' ? (
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Field name="companyName" label="Company name" error={errors.companyName}>
-            {(p) => <input {...p} type="text" autoComplete="organization" className={inputClass} />}
-          </Field>
-          <Field name="regions" label="Regions you cover" hint="Counties or countries" error={errors.regions}>
-            {(p) => <input {...p} type="text" className={inputClass} />}
-          </Field>
-        </div>
-      ) : null}
-
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field name="name" label={kind === 'contact' ? 'Your name' : 'Contact person'} error={errors.name}>
+        <Field name="name" label="Your name" error={errors.name}>
           {(p) => <input {...p} type="text" autoComplete="name" className={inputClass} />}
         </Field>
         <Field name="phone" label="Phone number" error={errors.phone}>
@@ -184,7 +148,7 @@ export function EnquiryForm({ kind }: { kind: EnquiryKind }) {
         ) : null}
       </div>
 
-      <Field name="message" label={kind === 'contact' ? 'Message' : 'Tell us about your business'} required={kind === 'contact'} error={errors.message}>
+      <Field name="message" label="Message" required error={errors.message}>
         {(p) => <textarea {...p} rows={5} maxLength={2000} className={cx(inputClass, 'min-h-32')} />}
       </Field>
 
@@ -200,7 +164,7 @@ export function EnquiryForm({ kind }: { kind: EnquiryKind }) {
             className="mt-0.5 size-5 shrink-0 accent-brand"
           />
           <label htmlFor={`${kind}-consent`} className="text-sm text-ink">
-            I agree to my details being used to reply to this {kind === 'contact' ? 'message' : 'enquiry'}, as described in the{' '}
+            I agree to my details being used to reply to this message, as described in the{' '}
             <Link href="/privacy" className="font-medium text-brand underline underline-offset-2">
               privacy policy
             </Link>

@@ -14,8 +14,6 @@ const pages = [
   '/skin-care/sun-care',
   '/about',
   '/contact',
-  '/partners/pharmacies',
-  '/partners/distributors',
   '/privacy',
   '/cookies',
   '/terms',
@@ -100,22 +98,27 @@ test('navigation menu works with the keyboard', async ({ page }, info) => {
   }
 })
 
-test('enquiry form shows accessible errors, then accepts a valid submission', async ({ page }) => {
-  await page.goto('/partners/pharmacies')
+test('contact form shows accessible errors, then accepts a valid submission', async ({ page }) => {
+  await page.goto('/contact')
   await page.waitForTimeout(2800) // the form rejects submissions faster than a person could type
-  await page.getByRole('button', { name: 'Send enquiry' }).click()
+  await page.getByRole('button', { name: 'Send message' }).click()
   await expect(page.getByRole('alert').filter({ hasText: 'Please check the highlighted fields' })).toBeVisible()
-  await expect(page.getByLabel('Business name')).toHaveAttribute('aria-invalid', 'true')
+  await expect(page.getByLabel('Your name')).toHaveAttribute('aria-invalid', 'true')
 
-  await page.getByLabel('Business name').fill('Test Pharmacy')
-  await page.getByLabel('Type of business').selectOption('Pharmacy')
-  await page.getByLabel('Town or county').fill('Nairobi')
-  await page.getByLabel('Contact person').fill('Jane Test')
+  await page.getByLabel('Your name').fill('Jane Test')
   await page.getByLabel('Phone number').fill('0712 345 678')
   await page.getByLabel('Email address').fill('jane@example.com')
+  await page.getByLabel('What is it about?').selectOption('Product advice')
+  await page.getByRole('textbox', { name: 'Message' }).fill('Which shampoo suits fine hair?')
   await page.getByRole('checkbox').check()
-  await page.getByRole('button', { name: 'Send enquiry' }).click()
-  await expect(page.getByRole('status').filter({ hasText: 'received your enquiry' })).toBeVisible()
+  await page.getByRole('button', { name: 'Send message' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'received your message' })).toBeVisible()
+})
+
+test('business enquiry pages are gone', async ({ request }) => {
+  const res = await request.get('/partners/pharmacies', { maxRedirects: 0 })
+  expect(res.status()).toBe(308)
+  expect(res.headers()['location']).toBe('/contact')
 })
 
 test('health check responds', async ({ request }) => {

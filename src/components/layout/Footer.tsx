@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { categories } from '@/lib/catalog'
-import { announcement, approvedSocialLinks, contact, footerLinks, operatorName, partnerNav, shown } from '@/lib/site'
+import { announcement, approvedSocialLinks, contact, footerLinks, operatorName, shown } from '@/lib/site'
 import { Icon, type IconName } from '../Icon'
 import { Container } from '../ui'
 import { Logo } from './Header'
@@ -90,16 +90,6 @@ export function Footer() {
               <li key={c.slug}>
                 <Link href={`/${c.slug}`} className="text-white/85 hover:text-white hover:underline">
                   {c.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <h2 className="mt-8 text-sm font-semibold tracking-wide text-white uppercase">For business</h2>
-          <ul className="mt-4 space-y-2.5 text-sm">
-            {partnerNav.map((p) => (
-              <li key={p.href}>
-                <Link href={p.href} className="text-white/85 hover:text-white hover:underline">
-                  {p.label}
                 </Link>
               </li>
             ))}

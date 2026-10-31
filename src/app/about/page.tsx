@@ -1,4 +1,4 @@
-import { ArrowLink, PageHeader, PendingNotice, Section, SectionHeading } from '@/components/ui'
+import { ArrowLink, PageHeader, Section, SectionHeading } from '@/components/ui'
 import { categories } from '@/lib/catalog'
 import { pageMeta } from '@/lib/seo'
 import { operatorName } from '@/lib/site'
@@ -20,7 +20,6 @@ export default function AboutPage() {
       />
       <Section>
         <div className="prose-bx">
-          <PendingNotice>The approved Bioxcin brand story will be added here in the next phase.</PendingNotice>
           <h2>Bioxcin in Kenya</h2>
           <p>
             The Bioxcin range is brought to Kenya by {operatorName}. This site is your guide to the Bioxcin product families, the

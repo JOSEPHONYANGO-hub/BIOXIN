@@ -13,7 +13,6 @@ const pages = [
   '/skin-care/hydra/hydra-toner',
   '/skin-care/sun-care',
   '/about',
-  '/science',
   '/contact',
   '/partners/pharmacies',
   '/partners/distributors',

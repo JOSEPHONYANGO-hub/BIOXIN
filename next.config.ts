@@ -21,7 +21,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     // /partners has no page of its own.
-    return [{ source: '/partners', destination: '/partners/pharmacies', permanent: false }]
+    return [
+      { source: '/partners', destination: '/partners/pharmacies', permanent: false },
+      // The science page was removed on 31 Oct 2026.
+      { source: '/science', destination: '/', permanent: true },
+    ]
   },
   async headers() {
     return [

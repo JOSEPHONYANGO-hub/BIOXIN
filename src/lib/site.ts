@@ -18,7 +18,7 @@ export const siteUrl = (process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:
 export const seoDefaults = {
   title: 'Bioxcin Kenya | Hair care, skin care and supplements',
   description:
-    'Bioxcin hair care, skin care and beauty supplements in Kenya. Explore the product families, the science behind them and where to buy.',
+    'Bioxcin hair care, skin care and beauty supplements in Kenya. Explore the product families and where to buy.',
   locale: 'en_KE',
 }
 
@@ -72,7 +72,6 @@ export const partnerNav: NavItem[] = [
 
 export const footerLinks: NavItem[] = [
   { label: 'About Bioxcin', href: '/about' },
-  { label: 'Science & ingredients', href: '/science' },
   { label: 'Contact us', href: '/contact' },
   { label: 'Privacy policy', href: '/privacy' },
   { label: 'Cookie policy', href: '/cookies' },

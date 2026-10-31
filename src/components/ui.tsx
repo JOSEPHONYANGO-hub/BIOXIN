@@ -170,19 +170,6 @@ export function PageHeader({
   )
 }
 
-/**
- * Marks content that is waiting for approved copy, so development placeholders can never be
- * mistaken for real product or legal information.
- */
-export function PendingNotice({ children }: { children: ReactNode }) {
-  return (
-    <div role="note" className="flex gap-3 rounded-md border border-dashed border-keratin-ink/60 bg-keratin/10 p-4 text-sm text-ink">
-      <span className="font-semibold text-keratin-ink">Content pending:</span>
-      <span>{children}</span>
-    </div>
-  )
-}
-
 export function ArrowLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link href={href} className="inline-flex items-center gap-1.5 font-semibold text-brand hover:text-accent-ink">

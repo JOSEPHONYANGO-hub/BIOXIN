@@ -4,7 +4,7 @@ import { ProductGrid } from '@/components/catalog/Catalog'
 import { HeroCarousel, type Slide } from '@/components/home/HeroCarousel'
 import { RoutineBuilder, type Routine } from '@/components/home/RoutineBuilder'
 import { Icon } from '@/components/Icon'
-import { ButtonLink, Container, cx, Section, SectionHeading } from '@/components/ui'
+import { Container, cx, Section, SectionHeading } from '@/components/ui'
 import { categories, findProduct, productHref, products } from '@/lib/catalog'
 import { pageMeta } from '@/lib/seo'
 import { partnerNav, seoDefaults } from '@/lib/site'
@@ -45,8 +45,8 @@ const slides: Slide[] = [
     eyebrow: 'Laboratories of dermocosmetic',
     title: 'Science-led care for hair and skin',
     text: 'Dermocosmetic formulas developed in the laboratory and tested on skin.',
-    href: '/science',
-    cta: 'Explore the science',
+    href: '/hair-care',
+    cta: 'Explore range',
   },
 ]
 
@@ -243,11 +243,6 @@ export default function HomePage() {
             ))}
           </dl>
           <p className="mt-4 text-xs text-white/70">Figures as printed on the product packaging.</p>
-          <div className="mt-8">
-            <ButtonLink href="/science" variant="onDark">
-              Explore the science
-            </ButtonLink>
-          </div>
         </Container>
       </section>
 

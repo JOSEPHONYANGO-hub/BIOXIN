@@ -24,7 +24,6 @@ type Props = {
 }
 
 const simpleLinks = [
-  { label: 'Science', href: '/science' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ]

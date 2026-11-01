@@ -18,6 +18,8 @@ const contentSecurityPolicy = [
 const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
+    // Product photos from the Eloria shop for listings without a brand packshot.
+    remotePatterns: [{ protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/hfqhpjgx/**' }],
   },
   async redirects() {
     return [

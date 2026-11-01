@@ -1,22 +1,25 @@
 import { notFound } from 'next/navigation'
-import { accentStyles, BuyButton, FamilyBadge, ProductGrid, WhatsAppButton } from '@/components/catalog/Catalog'
+import { accentStyles, BuyButton, FamilyBadge, Price, ProductGrid, WhatsAppButton } from '@/components/catalog/Catalog'
 import { ProductGallery } from '@/components/catalog/ProductGallery'
 import { ProductTabs, type Tab } from '@/components/catalog/ProductTabs'
 import { JsonLd } from '@/components/JsonLd'
 import { Icon } from '@/components/Icon'
 import { Breadcrumbs, Container, cx, Section, SectionHeading } from '@/components/ui'
-import { familyOf, getCategory, getProduct, productHref, products, productsIn } from '@/lib/catalog'
+import { displayPrice, familyOf, getCategory, productHref, productsIn } from '@/lib/catalog'
+import { findProduct, getProducts } from '@/lib/shop'
 import { pageMeta } from '@/lib/seo'
 import { siteUrl } from '@/lib/site'
 
 type Params = { params: Promise<{ category: string; family: string; product: string }> }
 
-export const dynamicParams = false
-export const generateStaticParams = () => products.map((p) => ({ category: p.category, family: p.family, product: p.slug }))
+// New shop listings get a page on first visit; removed ones become a 404 on the next refresh.
+export const dynamicParams = true
+export const generateStaticParams = async () =>
+  (await getProducts()).map((p) => ({ category: p.category, family: p.family, product: p.slug }))
 
 async function load(params: Params['params']) {
   const { category, family, product } = await params
-  return getProduct(category, family, product)
+  return findProduct(category, family, product)
 }
 
 export async function generateMetadata({ params }: Params) {
@@ -37,11 +40,11 @@ export default async function ProductPage({ params }: Params) {
   const category = getCategory(product.category)!
   const family = familyOf(product)
   const accent = accentStyles[family.accent]
-  const related = productsIn(product.category, product.family).filter((p) => p.slug !== product.slug)
+  const related = productsIn(await getProducts(), product.category, product.family).filter((p) => p.slug !== product.slug)
   const typeName = category.types.find((t) => t.slug === product.type)?.name
 
   const tabs: Tab[] = [
-    {
+    ...(product.ingredients.length ? [{
       key: 'ingredients',
       label: 'Active ingredients',
       content: (
@@ -53,7 +56,7 @@ export default async function ProductPage({ params }: Params) {
           ))}
         </ul>
       ),
-    },
+    }] : []),
     { key: 'use', label: 'How to use', content: <p className="text-ink">{product.howToUse}</p> },
     {
       key: 'clinical',
@@ -79,8 +82,15 @@ export default async function ProductPage({ params }: Params) {
     name: `Bioxcin ${product.name}`,
     brand: { '@type': 'Brand', name: 'Bioxcin' },
     description: product.summary,
-    image: product.images.map((i) => `${siteUrl}${i.src}`),
+    image: product.images.map((i) => (i.src.startsWith('http') ? i.src : `${siteUrl}${i.src}`)),
     url: `${siteUrl}${productHref(product)}`,
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'KES',
+      price: displayPrice(product),
+      availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: `https://eloriabeauty.co.ke/products/${product.shopSlug}`,
+    },
   }
 
   return (
@@ -106,8 +116,13 @@ export default async function ProductPage({ params }: Params) {
             </div>
             <h1 className="mt-3 text-3xl sm:text-4xl">{product.name}</h1>
             {typeName || product.size ? <p className="mt-2 text-muted">{[typeName, product.size].filter(Boolean).join(' · ')}</p> : null}
+            <div className="mt-5">
+              <Price product={product} size="lg" />
+              {!product.inStock ? <p className="mt-1 font-semibold text-forte">Out of stock</p> : null}
+            </div>
             <p className="mt-5 text-lg">{product.summary}</p>
 
+            {product.benefits.length ? (
             <ul className="mt-6 grid gap-2 sm:grid-cols-2">
               {product.benefits.map((b) => (
                 <li key={b} className="flex gap-2 text-sm text-ink">
@@ -116,6 +131,7 @@ export default async function ProductPage({ params }: Params) {
                 </li>
               ))}
             </ul>
+            ) : null}
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <BuyButton product={product} className="sm:min-w-48" />

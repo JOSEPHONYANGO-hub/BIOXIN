@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { FamilyCard, ProductGrid } from '@/components/catalog/Catalog'
 import { Breadcrumbs, Container, cx, Section, SectionHeading } from '@/components/ui'
-import { type Category, categories, getCategory, productsIn } from '@/lib/catalog'
+import { type Category, categories, familiesWithProducts, getCategory, productsIn } from '@/lib/catalog'
+import { getProducts } from '@/lib/shop'
 import { pageMeta } from '@/lib/seo'
 
 type Props = {
@@ -58,10 +59,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const category = getCategory((await params).category)
   if (!category) notFound()
   const { need, type } = await searchParams
-  const activeNeed = category.needs.find((n) => n.slug === need)
-  const activeType = category.types.find((t) => t.slug === type)
+  const all = productsIn(await getProducts(), category.slug)
+  const needs = category.needs.filter((n) => all.some((p) => p.needs.includes(n.slug)))
+  const types = category.types.filter((t) => all.some((p) => p.type === t.slug))
+  const families = familiesWithProducts(all, category)
+  const activeNeed = needs.find((n) => n.slug === need)
+  const activeType = types.find((t) => t.slug === type)
 
-  const items = productsIn(category.slug).filter(
+  const items = all.filter(
     (p) => (!activeNeed || p.needs.includes(activeNeed.slug)) && (!activeType || p.type === activeType.slug),
   )
   const heading = activeNeed?.name ?? activeType?.name ?? `All ${category.name.toLowerCase()}`
@@ -84,9 +89,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       <Section aria-labelledby="families-heading">
         <SectionHeading id="families-heading" title="Product families" />
         <ul className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
-          {category.families.map((f) => (
+          {families.map((f) => (
             <li key={f.slug}>
-              <FamilyCard category={category} family={f} />
+              <FamilyCard category={category} family={f} products={productsIn(all, category.slug, f.slug)} />
             </li>
           ))}
         </ul>
@@ -99,11 +104,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         <div className="mt-6 space-y-4">
           <div>
             <p className="mb-2 text-xs font-semibold tracking-[0.14em] text-accent-ink uppercase">Needs</p>
-            <FilterChips category={category} kind="need" items={category.needs} active={activeNeed?.slug} />
+            <FilterChips category={category} kind="need" items={needs} active={activeNeed?.slug} />
           </div>
           <div>
             <p className="mb-2 text-xs font-semibold tracking-[0.14em] text-accent-ink uppercase">Product types</p>
-            <FilterChips category={category} kind="type" items={category.types} active={activeType?.slug} />
+            <FilterChips category={category} kind="type" items={types} active={activeType?.slug} />
           </div>
         </div>
         <p className="mt-6 mb-6 text-sm text-muted" role="status">

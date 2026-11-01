@@ -4,7 +4,7 @@ import './globals.css'
 import { Footer, UtilityBar } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { JsonLd } from '@/components/JsonLd'
-import { categories } from '@/lib/catalog'
+import { getMenuCategories } from '@/lib/shop'
 import { approvedSocialLinks, contact, isProduction, seoDefaults, shown, siteName, siteUrl } from '@/lib/site'
 
 export const metadata: Metadata = {
@@ -18,20 +18,14 @@ export const metadata: Metadata = {
   robots: isProduction ? { index: true, follow: true } : { index: false, follow: false },
 }
 
+/** Re-read prices and stock from the shop at most every 10 minutes (matches SHOP_REVALIDATE). */
+export const revalidate = 600
+
 export const viewport: Viewport = {
   themeColor: '#003b73',
   width: 'device-width',
   initialScale: 1,
 }
-
-const menuCategories = categories.map((c) => ({
-  slug: c.slug,
-  name: c.name,
-  image: c.image,
-  needs: c.needs,
-  types: c.types,
-  families: c.families.map((f) => ({ slug: f.slug, name: f.name, focus: f.focus, accent: f.accent })),
-}))
 
 const organization = {
   '@context': 'https://schema.org',
@@ -46,7 +40,15 @@ const organization = {
   sameAs: approvedSocialLinks.map((s) => s.href),
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const menuCategories = (await getMenuCategories()).map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    image: c.image,
+    needs: c.needs,
+    types: c.types,
+    families: c.families.map((f) => ({ slug: f.slug, name: f.name, focus: f.focus, accent: f.accent })),
+  }))
   return (
     <html lang="en-KE">
       <body className="flex min-h-dvh flex-col">

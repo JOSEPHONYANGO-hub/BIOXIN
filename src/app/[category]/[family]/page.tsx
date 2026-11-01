@@ -1,20 +1,26 @@
 import { notFound } from 'next/navigation'
 import { accentStyles, ProductGrid } from '@/components/catalog/Catalog'
 import { ArrowLink, cx, PageHeader, Section } from '@/components/ui'
-import { categories, getCategory, getFamily, productsIn } from '@/lib/catalog'
+import { categories, familiesWithProducts, getCategory, getFamily, productsIn } from '@/lib/catalog'
+import { getProducts } from '@/lib/shop'
 import { pageMeta } from '@/lib/seo'
 
 type Params = { params: Promise<{ category: string; family: string }> }
 
-export const dynamicParams = false
-export const generateStaticParams = () =>
-  categories.flatMap((c) => c.families.map((f) => ({ category: c.slug, family: f.slug })))
+// Families come and go with the shop's stock list, so unknown or empty families are a 404.
+export const dynamicParams = true
+export const generateStaticParams = async () => {
+  const products = await getProducts()
+  return categories.flatMap((c) => familiesWithProducts(products, c).map((f) => ({ category: c.slug, family: f.slug })))
+}
 
 async function load(params: Params['params']) {
   const { category: c, family: f } = await params
   const category = getCategory(c)
   const family = category && getFamily(category, f)
-  return category && family ? { category, family } : null
+  if (!category || !family) return null
+  const items = productsIn(await getProducts(), category.slug, family.slug)
+  return items.length ? { category, family, items } : null
 }
 
 export async function generateMetadata({ params }: Params) {
@@ -31,8 +37,7 @@ export async function generateMetadata({ params }: Params) {
 export default async function FamilyPage({ params }: Params) {
   const found = await load(params)
   if (!found) notFound()
-  const { category, family } = found
-  const items = productsIn(category.slug, family.slug)
+  const { category, family, items } = found
   const accent = accentStyles[family.accent]
 
   return (
@@ -45,11 +50,7 @@ export default async function FamilyPage({ params }: Params) {
         crumbs={[{ label: 'Home', href: '/' }, { label: category.name, href: `/${category.slug}` }, { label: family.name }]}
       />
       <Section aria-label={`${family.name} products`}>
-        {items.length ? (
-          <ProductGrid products={items} />
-        ) : (
-          <p className="text-muted">Products in this range are coming soon.</p>
-        )}
+        <ProductGrid products={items} />
         <div className="mt-10">
           <ArrowLink href={`/${category.slug}`}>All {category.name.toLowerCase()}</ArrowLink>
         </div>

@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Accent, Category, Family, Product } from '@/lib/catalog'
-import { familyOf, productHref, productsIn } from '@/lib/catalog'
+import { displayPrice, familyOf, formatPrice, productHref } from '@/lib/catalog'
 import { buyLink, productCta, whatsappEnquiryLink } from '@/lib/site'
 import { Icon } from '../Icon'
 import { buttonStyles, cx } from '../ui'
@@ -67,14 +67,38 @@ export function ProductImage({
   )
 }
 
-/** "Buy now" link to the retail shop. Only for products the shop sells; others get no link at all. */
+/** "Buy now" link to the product on the Eloria shop. */
 export function BuyButton({ product, className }: { product: Product; className?: string }) {
-  if (!product.shopSlug || productCta === 'whatsapp') return null
+  if (productCta === 'whatsapp') return null
   return (
     <a href={buyLink(product.shopSlug)} target="_blank" rel="noopener" className={buttonStyles('primary', className)}>
       Buy now
       <span className="sr-only">: {product.name} (opens in a new tab)</span>
     </a>
+  )
+}
+
+/** Price as on the shop: the price after discount, with the original price struck through. */
+export function Price({ product, size = 'md' }: { product: Product; size?: 'md' | 'lg' }) {
+  const now = displayPrice(product)
+  const discounted = now < product.price
+  const off = discounted ? Math.round(((product.price - now) / product.price) * 100) : 0
+  return (
+    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+      <span className={cx('font-extrabold text-ink', size === 'lg' ? 'text-3xl' : 'text-lg')}>
+        <span className="sr-only">{discounted ? 'Sale price ' : 'Price '}</span>
+        {formatPrice(now)}
+      </span>
+      {discounted ? (
+        <>
+          <span className={cx('text-muted line-through', size === 'lg' ? 'text-lg' : 'text-sm')}>
+            <span className="sr-only">Original price </span>
+            {formatPrice(product.price)}
+          </span>
+          <span className="rounded-full bg-forte px-2 py-0.5 text-xs font-bold text-white">-{off}%</span>
+        </>
+      ) : null}
+    </p>
   )
 }
 
@@ -123,8 +147,12 @@ export function ProductCard({ product }: { product: Product }) {
           </Link>
         </h3>
         {product.size ? <p className="text-sm text-muted">{product.size}</p> : null}
-        {product.shopSlug && productCta !== 'whatsapp' ? (
-          <div className="relative z-10 mt-auto pt-3">
+        <div className="mt-auto pt-2">
+          <Price product={product} />
+          {!product.inStock ? <p className="mt-1 text-sm font-semibold text-forte">Out of stock</p> : null}
+        </div>
+        {productCta !== 'whatsapp' ? (
+          <div className="relative z-10 pt-2">
             <BuyButton product={product} className="w-full" />
           </div>
         ) : null}
@@ -145,25 +173,26 @@ export function ProductGrid({ products }: { products: Product[] }) {
   )
 }
 
-export function FamilyCard({ category, family }: { category: Category; family: Family }) {
+export function FamilyCard({ category, family, products }: { category: Category; family: Family; products: Product[] }) {
   const accent = accentStyles[family.accent]
-  const count = productsIn(category.slug, family.slug).length
+  const count = products.length
+  const image = products.find((p) => p.images.length)?.images[0]
   return (
     <Link
       href={`/${category.slug}/${family.slug}`}
       className={cx('group flex h-full flex-col overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-md', accent.border)}
     >
       <span className={cx('h-1', accent.bar)} aria-hidden="true" />
-      {family.image ? (
+      {image ? (
         <span className={cx('relative block aspect-[4/3]', accent.tint)}>
-          <Image src={family.image} alt="" fill sizes="(min-width: 1024px) 22vw, 45vw" className="object-contain p-4" />
+          <Image src={image.src} alt="" fill sizes="(min-width: 1024px) 22vw, 45vw" className="object-contain p-4 mix-blend-multiply" />
         </span>
       ) : null}
       <span className="flex flex-1 flex-col p-5">
         <span className="text-lg font-bold text-brand group-hover:underline">{family.name}</span>
         {family.focus ? <span className={cx('mt-1 text-sm font-medium', accent.text)}>{family.focus}</span> : null}
         <span className="mt-auto pt-3 text-xs font-medium text-muted">
-          {count ? `${count} ${count === 1 ? 'product' : 'products'}` : 'Coming soon'}
+          {count} {count === 1 ? 'product' : 'products'}
         </span>
       </span>
     </Link>

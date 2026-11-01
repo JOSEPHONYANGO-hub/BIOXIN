@@ -5,7 +5,8 @@ import { HeroCarousel, type Slide } from '@/components/home/HeroCarousel'
 import { RoutineBuilder, type Routine } from '@/components/home/RoutineBuilder'
 import { Icon } from '@/components/Icon'
 import { Container, cx, Section, SectionHeading } from '@/components/ui'
-import { categories, findProduct, productHref, products } from '@/lib/catalog'
+import { categories, displayPrice, type Product, productHref } from '@/lib/catalog'
+import { getProducts } from '@/lib/shop'
 import { pageMeta } from '@/lib/seo'
 import { seoDefaults } from '@/lib/site'
 
@@ -24,7 +25,6 @@ const dims: Record<string, [number, number]> = {
   'age-reverse-gold-cream': [900, 755],
   'age-reverse-serum': [339, 900],
   'age-reverse-eye-cream': [238, 900],
-  'sun-cream-kids': [397, 900],
   'sun-stick': [449, 900],
 }
 
@@ -82,7 +82,7 @@ const slides: Slide[] = [
   {
     eyebrow: 'Bioxcin Age Reverse',
     title: 'Anti-wrinkle care for all skin types',
-    text: 'Filling and firming Gold Cream, Anti-Wrinkle Serum and Night Eye Cream.',
+    text: 'Filling and firming Gold Cream, Anti-Wrinkle Serum and Eye Cream.',
     href: '/skin-care/age-reverse',
     cta: 'Explore range',
     panel: 'from-brand to-brand-dark',
@@ -97,59 +97,53 @@ const slides: Slide[] = [
   {
     eyebrow: 'Bioxcin Sun Care',
     title: 'SPF 50+ for the whole family',
-    text: 'Very high protection for every skin type, from the easy-carry sun stick to mineral sun cream for children.',
+    text: 'Very high protection for every skin type, from the easy-carry sun stick to tinted creams for dry and oily skin.',
     href: '/skin-care/sun-care',
     cta: 'Explore range',
     panel: 'from-[#c2410c] to-[#7c2d12]',
     stage: 'bg-gradient-to-br from-[#fff6ec] to-[#ffe0bf]',
     ctaText: 'text-[#9a3412]',
     badge: 'SPF 50+',
-    products: [pack('sun-stick', 'Bioxcin Sun Care Stick SPF 50+'), pack('sun-cream-kids', 'Bioxcin Sun Care Kids Mineral Sun Cream SPF 50+')],
+    products: [pack('sun-stick', 'Bioxcin Sun Care Stick SPF 50+')],
   },
 ]
 
-type Showcase = { name: string; focus: string; href: string; image: string; panel: string; cover?: boolean }
+type Showcase = { name: string; focus: string; category: string; family?: string; image?: string; panel: string }
 
+/** Family tiles. A tile shows only when the shop sells that family; without a local packshot it uses the shop photo. */
 const showcase: Showcase[] = [
-  { name: 'Forte', focus: 'Intensive hair loss', href: '/hair-care/forte', image: '/images/products/forte-shampoo.webp', panel: 'from-forte to-[#5c0000]' },
+  { name: 'Forte', focus: 'Intensive hair loss', category: 'hair-care', family: 'forte', image: '/images/products/forte-shampoo.webp', panel: 'from-forte to-[#5c0000]' },
   {
     name: 'Keratin & Argan',
     focus: 'Damage repair',
-    href: '/hair-care/keratin-argan',
+    category: 'hair-care',
+    family: 'keratin-argan',
     image: '/images/products/keratin-argan-oil.webp',
     panel: 'from-keratin-ink to-[#4f3d08]',
   },
   {
     name: 'Collagen & Biotin',
     focus: 'Volume and fullness',
-    href: '/hair-care/collagen-biotin',
+    category: 'hair-care',
+    family: 'collagen-biotin',
     image: '/images/products/collagen-biotin-shampoo.webp',
     panel: 'from-collagen to-[#5e2a75]',
   },
-  { name: 'Hydra', focus: 'Skin Expert hydration', href: '/skin-care/hydra', image: '/images/products/hydra-cream-normal-dry.webp', cover: true, panel: 'from-hydra-ink to-[#00477a]' },
-  {
-    name: 'Beauty Boosters',
-    focus: 'Food supplements',
-    href: '/supplements',
-    image: '/images/products/keratin-complex.webp',
-    panel: 'from-brand to-brand-dark',
-  },
+  { name: 'Hydra', focus: 'Skin Expert hydration', category: 'skin-care', family: 'hydra', panel: 'from-hydra-ink to-[#00477a]' },
+  { name: 'Beauty Boosters', focus: 'Food supplements', category: 'supplements', panel: 'from-brand to-brand-dark' },
 ]
 
-const step = (slug: string, stepName: string, verb: string) => {
-  const p = findProduct(slug)!
-  return { step: stepName, verb, name: p.name, href: productHref(p), image: p.images[0].src, alt: p.images[0].alt }
-}
+type RoutinePlan = { key: string; label: string; accent: string; steps: Array<[slug: string, step: string, verb: string]> }
 
-const routines: Routine[] = [
+const routinePlans: RoutinePlan[] = [
   {
     key: 'hair-loss',
     label: 'Hair loss',
     accent: 'text-forte',
     steps: [
-      step('forte-shampoo', 'Cleanse', 'Shampoo'),
-      step('forte-serum', 'Treat', 'Serum'),
-      step('keratin-complex-tablets', 'Nourish', 'Supplement'),
+      ['forte-shampoo', 'Cleanse', 'Shampoo'],
+      ['forte-serum', 'Treat', 'Serum'],
+      ['collagen-beauty-powder', 'Nourish', 'Supplement'],
     ],
   },
   {
@@ -157,9 +151,9 @@ const routines: Routine[] = [
     label: 'Fine, flat hair',
     accent: 'text-collagen',
     steps: [
-      step('collagen-biotin-shampoo', 'Cleanse', 'Shampoo'),
-      step('collagen-biotin-serum', 'Treat', 'Serum'),
-      step('keratin-complex-tablets', 'Nourish', 'Supplement'),
+      ['collagen-biotin-shampoo', 'Cleanse', 'Shampoo'],
+      ['collagen-biotin-serum', 'Treat', 'Serum'],
+      ['collagen-beauty-powder', 'Nourish', 'Supplement'],
     ],
   },
   {
@@ -167,12 +161,23 @@ const routines: Routine[] = [
     label: 'Damaged hair',
     accent: 'text-keratin-ink',
     steps: [
-      step('keratin-argan-shampoo', 'Cleanse', 'Shampoo'),
-      step('keratin-argan-hair-oil', 'Treat', 'Hair oil'),
-      step('keratin-complex-tablets', 'Nourish', 'Supplement'),
+      ['keratin-argan-shampoo', 'Cleanse', 'Shampoo'],
+      ['keratin-argan-hair-oil', 'Treat', 'Hair oil'],
+      ['collagen-beauty-powder', 'Nourish', 'Supplement'],
     ],
   },
 ]
+
+/** Routines whose every product is on the shop and has a photo. */
+function buildRoutines(products: Product[]): Routine[] {
+  return routinePlans.flatMap((plan) => {
+    const steps = plan.steps.map(([slug, stepName, verb]) => {
+      const p = products.find((x) => x.slug === slug)
+      return p?.images[0] ? { step: stepName, verb, name: p.name, href: productHref(p), image: p.images[0].src, alt: p.images[0].alt } : null
+    })
+    return steps.every(Boolean) ? [{ key: plan.key, label: plan.label, accent: plan.accent, steps: steps as Routine['steps'] }] : []
+  })
+}
 
 const stats = [
   { value: '98%', label: 'volume', note: 'Collagen & Biotin, Extra Volume technology' },
@@ -180,8 +185,20 @@ const stats = [
   { value: '0', label: 'parabens', note: 'Dermatologically tested, hypoallergenic hair care' },
 ]
 
-export default function HomePage() {
-  const featured = products.filter((p) => p.shopSlug && p.images.length).slice(0, 8)
+export default async function HomePage() {
+  const products = await getProducts()
+  // Discounted products with brand packshots first, as on the shop.
+  const featured = [...products]
+    .filter((p) => p.inStock && p.images.length)
+    .sort((a, b) => Number(b.images[0].src.startsWith('/')) - Number(a.images[0].src.startsWith('/')) || Number(displayPrice(b) < b.price) - Number(displayPrice(a) < a.price))
+    .slice(0, 8)
+  const routines = buildRoutines(products)
+  const tiles = showcase.flatMap((t) => {
+    const items = products.filter((p) => p.category === t.category && (!t.family || p.family === t.family))
+    const image = t.image ?? items.find((p) => p.images.length)?.images[0].src
+    if (!items.length || !image) return []
+    return [{ ...t, image, href: t.family ? `/${t.category}/${t.family}` : `/${t.category}` }]
+  })
 
   return (
     <>
@@ -215,7 +232,7 @@ export default function HomePage() {
       <Section tone="surface" aria-labelledby="families-heading">
         <SectionHeading id="families-heading" eyebrow="Product families" title="Find your Bioxcin range" />
         <ul className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-5">
-          {showcase.map((f) => (
+          {tiles.map((f) => (
             <li key={f.name}>
               <Link
                 href={f.href}
@@ -227,7 +244,7 @@ export default function HomePage() {
                     alt=""
                     fill
                     sizes="(min-width: 1024px) 18vw, 45vw"
-                    className={cx('transition-transform duration-500 group-hover:scale-105', f.cover ? 'object-cover' : 'object-contain p-5')}
+                    className="object-contain p-5 transition-transform duration-500 group-hover:scale-105"
                   />
                 </span>
                 <span className={cx('flex flex-1 flex-col bg-gradient-to-br p-5 text-white', f.panel)}>
@@ -244,6 +261,8 @@ export default function HomePage() {
       </Section>
 
       {/* 3-step routine */}
+      {routines.length ? (
+        <>
       <Section aria-labelledby="routine-heading">
         <SectionHeading
           id="routine-heading"
@@ -253,6 +272,8 @@ export default function HomePage() {
         />
         <RoutineBuilder routines={routines} />
       </Section>
+        </>
+      ) : null}
 
       {/* Science & trust */}
       <section aria-labelledby="science-heading" className="bg-brand py-14 text-white sm:py-20">

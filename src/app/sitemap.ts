@@ -1,14 +1,18 @@
 import type { MetadataRoute } from 'next'
-import { categories, productHref, products } from '@/lib/catalog'
+import { categories, familiesWithProducts, productHref } from '@/lib/catalog'
+import { getProducts } from '@/lib/shop'
 import { siteUrl } from '@/lib/site'
 
 const staticPaths = ['/', '/about', '/contact', '/privacy', '/cookies', '/terms']
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const products = await getProducts()
   return [
     ...staticPaths.map((p) => ({ url: `${siteUrl}${p === '/' ? '' : p}` })),
-    ...categories.flatMap((c) => [{ url: `${siteUrl}/${c.slug}` }, ...c.families.map((f) => ({ url: `${siteUrl}/${c.slug}/${f.slug}` }))]),
-    // Development samples are left out until their approved content is in.
+    ...categories.flatMap((c) => [
+      { url: `${siteUrl}/${c.slug}` },
+      ...familiesWithProducts(products, c).map((f) => ({ url: `${siteUrl}/${c.slug}/${f.slug}` })),
+    ]),
     ...products.map((p) => ({ url: `${siteUrl}${productHref(p)}` })),
   ]
 }

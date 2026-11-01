@@ -1,10 +1,9 @@
 /**
  * Catalogue: categories, needs, product types, families and products.
  *
- * Category and family names follow bioxcin.com.tr. Product photos are the brand's own packshots,
- * reused with written permission. Product copy is limited to what the packaging itself states
- * (names, sizes, featured ingredients, the technologies and the figures printed on pack); nothing
- * is invented. Products sold on the retail shop carry a `shopSlug`, and only those get a Buy link.
+ * Category and family names follow bioxcin.com.tr. The site lists only the Bioxcin products sold on
+ * the Eloria shop: the list, prices and stock come live from the shop (see shop.ts), and the
+ * curated names, packshots and pack details come from product-info.ts.
  */
 
 export type Accent = 'brand' | 'forte' | 'collagen' | 'keratin' | 'hydra'
@@ -16,8 +15,6 @@ export type Family = {
   accent: Accent
   /** One or two sentences shown on the family page. */
   description?: string
-  /** Packshot or scene used for the family on cards and menus. */
-  image?: string
 }
 
 export type Facet = { slug: string; name: string }
@@ -35,7 +32,9 @@ export type Category = {
 
 export type ProductImage = { src: string; alt: string }
 
-export type Product = {
+/** Curated details for one shop listing. */
+export type ProductInfo = {
+  /** Path segment used on this site. */
   slug: string
   name: string
   category: Category['slug']
@@ -46,20 +45,24 @@ export type Product = {
   needs: string[]
   size?: string
   summary: string
-  /** First image is the main packshot; further images build the gallery. Empty shows the brand placeholder. */
+  /** Brand packshots. When empty, the shop's own product photo is used. */
   images: ProductImage[]
-  /** Highlights printed on the pack. */
   benefits: string[]
-  /** Featured actives as named on the pack. */
   ingredients: string[]
   howToUse: string
-  /** Figures printed on the pack. Shown only where the pack states one. */
   clinical?: string[]
-  /** Product slug on the retail shop. Only products the shop sells have one, and only those get a Buy button. */
-  shopSlug?: string
 }
 
-const img = (file: string, alt: string): ProductImage => ({ src: `/images/products/${file}.webp`, alt })
+/** A product as shown on the site: curated details plus live price and stock from the shop. */
+export type Product = ProductInfo & {
+  /** Product slug on the Eloria shop; the Buy now link goes there. */
+  shopSlug: string
+  /** Price before discount, in KES. */
+  price: number
+  /** Price after discount, in KES, when the shop has one. */
+  salePrice: number | null
+  inStock: boolean
+}
 
 export const categories: Category[] = [
   {
@@ -74,6 +77,7 @@ export const categories: Category[] = [
       { slug: 'repair', name: 'Damaged hair' },
       { slug: 'nourishment', name: 'Dry hair and nourishment' },
       { slug: 'oily-hair', name: 'Oily hair' },
+      { slug: 'dandruff', name: 'Dandruff' },
       { slug: 'brows-lashes', name: 'Brows and lashes' },
     ],
     types: [
@@ -92,7 +96,6 @@ export const categories: Category[] = [
         focus: 'Intensive hair loss',
         accent: 'forte',
         description: 'Herbal care for intensive hair loss, with the patented BioComplex B11 formula and liposome technology.',
-        image: '/images/products/forte-shampoo.webp',
       },
       {
         slug: 'collagen-biotin',
@@ -100,7 +103,6 @@ export const categories: Category[] = [
         focus: 'Volume and fullness',
         accent: 'collagen',
         description: 'Volumising care with collagen and biotin and Extra Volume technology, for fine hair that is prone to falling out.',
-        image: '/images/products/collagen-biotin-shampoo.webp',
       },
       {
         slug: 'keratin-argan',
@@ -108,7 +110,6 @@ export const categories: Category[] = [
         focus: 'Damage repair',
         accent: 'keratin',
         description: 'Repairing care with keratin and argan oil and Extra Repair technology, for damaged hair that is prone to falling out.',
-        image: '/images/products/keratin-argan-shampoo.webp',
       },
       {
         slug: 'biotin',
@@ -116,7 +117,6 @@ export const categories: Category[] = [
         focus: 'Hair loss',
         accent: 'brand',
         description: 'Daily care shampoo with biotin for all hair types.',
-        image: '/images/products/biotin-shampoo.webp',
       },
       {
         slug: 'caffeine-arginine',
@@ -124,7 +124,6 @@ export const categories: Category[] = [
         focus: 'Hair loss',
         accent: 'brand',
         description: 'Anti hair loss shampoo with caffeine and arginine.',
-        image: '/images/products/caffeine-arginine-shampoo.webp',
       },
       {
         slug: 'black-garlic',
@@ -132,7 +131,6 @@ export const categories: Category[] = [
         focus: 'Hair loss and thinning',
         accent: 'brand',
         description: 'Sulphate-free herbal shampoo with black garlic for hair loss.',
-        image: '/images/products/black-garlic-shampoo.webp',
       },
       {
         slug: 'classic',
@@ -140,7 +138,6 @@ export const categories: Category[] = [
         focus: 'Hair loss',
         accent: 'brand',
         description: 'The original Bioxcin herbal shampoo for hair loss.',
-        image: '/images/products/classic-shampoo-oily.webp',
       },
       {
         slug: 'quantum',
@@ -148,7 +145,6 @@ export const categories: Category[] = [
         focus: 'Volume',
         accent: 'brand',
         description: 'Shampoo with Bio-Activ peptides.',
-        image: '/images/products/quantum-shampoo.webp',
       },
       { slug: 'aqua-thermal', name: 'Aqua Thermal', focus: 'Dandruff', accent: 'brand' },
       {
@@ -157,7 +153,6 @@ export const categories: Category[] = [
         focus: 'Nourishment',
         accent: 'keratin',
         description: 'Nourishing care with a blend of nine oils and vitamin B5.',
-        image: '/images/products/nourishing-oils-shampoo.webp',
       },
       {
         slug: 'brow-lash-serum',
@@ -165,7 +160,6 @@ export const categories: Category[] = [
         focus: 'Brows and lashes',
         accent: 'brand',
         description: 'Serum pen for eyelashes and eyebrows.',
-        image: '/images/products/brow-lash-serum.webp',
       },
     ],
   },
@@ -199,7 +193,6 @@ export const categories: Category[] = [
         focus: 'Hydration',
         accent: 'hydra',
         description: 'Moisturising care for the face, for normal to dry and for oily skin.',
-        image: '/images/products/hydra-cream-normal-dry.webp',
       },
       {
         slug: 'skin-expert',
@@ -207,7 +200,6 @@ export const categories: Category[] = [
         focus: 'Targeted serums',
         accent: 'hydra',
         description: 'Concentrated face serums with a single hero active.',
-        image: '/images/products/vitamin-c-serum.webp',
       },
       {
         slug: 'acnium',
@@ -215,7 +207,6 @@ export const categories: Category[] = [
         focus: 'Acne-prone skin',
         accent: 'brand',
         description: 'Care for oily, combination and acne-prone skin with the Acnium Herbal Complex.',
-        image: '/images/products/acnium-cleansing-gel.webp',
       },
       {
         slug: 'age-reverse',
@@ -223,7 +214,6 @@ export const categories: Category[] = [
         focus: 'Anti-wrinkle',
         accent: 'brand',
         description: 'Anti-wrinkle care with filling and firming actives, for all skin types.',
-        image: '/images/products/age-reverse-gold-cream.webp',
       },
       {
         slug: 'atopicare',
@@ -231,7 +221,6 @@ export const categories: Category[] = [
         focus: 'Dry and atopic-prone skin',
         accent: 'brand',
         description: 'Care for very dry and atopic-prone skin with a patented skin barrier formula.',
-        image: '/images/products/atopicare-cream.webp',
       },
       {
         slug: 'sun-care',
@@ -239,7 +228,6 @@ export const categories: Category[] = [
         focus: 'Sun protection',
         accent: 'brand',
         description: 'Very high SPF 50+ protection for every skin type, including babies and children.',
-        image: '/images/products/sun-cream-sensitive.webp',
       },
       {
         slug: 'gold-on-skin',
@@ -247,8 +235,8 @@ export const categories: Category[] = [
         focus: 'Body care',
         accent: 'keratin',
         description: 'Dry oil for face, body and hair.',
-        image: '/images/products/gold-on-skin-dry-oil.webp',
       },
+      { slug: 'body-care', name: 'Body Care', focus: 'Everyday body care', accent: 'brand' },
     ],
   },
   {
@@ -273,7 +261,6 @@ export const categories: Category[] = [
         focus: 'Beauty from within',
         accent: 'collagen',
         description: 'Collagen powder supplements to mix into a drink.',
-        image: '/images/products/collagen-sport.webp',
       },
       { slug: 'collagen', name: 'Collagen', accent: 'brand' },
       { slug: 'beauty-booster', name: 'Beauty Booster', accent: 'collagen' },
@@ -284,656 +271,9 @@ export const categories: Category[] = [
         name: 'Keratin',
         accent: 'forte',
         description: 'Keratin Complex tablets with amino acids, biotin and zinc.',
-        image: '/images/products/keratin-complex.webp',
       },
       { slug: 'biotin', name: 'Biotin', accent: 'brand' },
     ],
-  },
-]
-
-const shampooUse = 'Apply to wet hair and massage gently into the scalp. Leave for 2 to 3 minutes, then rinse well. Repeat if needed.'
-const conditionerUse = 'After shampooing, apply to the lengths and ends of damp hair. Leave for 2 to 3 minutes, then rinse.'
-const leaveInUse = 'Spray onto clean, towel-dried hair from mid-lengths to ends. Do not rinse. Style as usual.'
-const sunUse = 'Apply generously before sun exposure and reapply often, especially after swimming, sweating or towelling.'
-
-export const products: Product[] = [
-  // Hair care: Forte
-  {
-    slug: 'forte-shampoo',
-    name: 'Forte Herbal Shampoo',
-    category: 'hair-care',
-    family: 'forte',
-    type: 'shampoo',
-    needs: ['hair-loss'],
-    size: '300 ml',
-    summary: 'Herbal shampoo for intensive hair loss, for all hair types.',
-    images: [img('forte-shampoo', 'Bioxcin Forte Herbal Shampoo, 300 ml bottle'), img('forte-shampoo-2', 'Bioxcin Forte shampoo, front of bottle'), img('forte-lab', 'Bioxcin Forte shampoo and serum')],
-    benefits: ['For intensive hair loss', 'For all hair types', 'Dermatologically tested', 'Hypoallergenic, no parabens'],
-    ingredients: ['BioComplex B11 (patented formula)', 'Liposome technology', 'Herbal extracts'],
-    howToUse: shampooUse,
-  },
-  {
-    slug: 'forte-serum',
-    name: 'Forte Herbal Serum',
-    category: 'hair-care',
-    family: 'forte',
-    type: 'serum',
-    needs: ['hair-loss'],
-    size: '50 ml',
-    summary: 'Herbal serum for intensive hair loss, with liposome technology for fast effect.',
-    images: [img('forte-serum', 'Bioxcin Forte Herbal Serum, 50 ml dropper bottle'), img('forte-serum-box', 'Bioxcin Forte Herbal Serum, 3 × 50 ml pack')],
-    benefits: ['For intensive hair loss', 'For all hair types', 'Fast effect', 'Dermatologically tested'],
-    ingredients: ['BioComplex B11 (patented formula)', 'Liposome technology', 'Herbal extracts'],
-    howToUse: 'Apply to a clean, dry or towel-dried scalp, section by section. Massage gently. Do not rinse.',
-    shopSlug: 'bioxcin-forte-serum-50-ml',
-  },
-  {
-    slug: 'forte-tonic',
-    name: 'Forte Tonic',
-    category: 'hair-care',
-    family: 'forte',
-    type: 'tonic',
-    needs: ['hair-loss'],
-    summary: 'Hair tonic for intensive hair loss.',
-    images: [img('forte-tonic', 'Bioxcin Forte Tonic spray bottle')],
-    benefits: ['For intensive hair loss', 'For all hair types'],
-    ingredients: ['BioComplex B11 (patented formula)', 'Liposome technology'],
-    howToUse: 'Spray onto a clean scalp and massage in gently. Do not rinse.',
-  },
-
-  // Hair care: Collagen & Biotin
-  {
-    slug: 'collagen-biotin-shampoo',
-    name: 'Collagen & Biotin Volumising Shampoo',
-    category: 'hair-care',
-    family: 'collagen-biotin',
-    type: 'shampoo',
-    needs: ['volume', 'hair-loss'],
-    size: '300 ml',
-    summary: 'Volumising shampoo for hair loss, for fine hair that needs body.',
-    images: [img('collagen-biotin-shampoo', 'Bioxcin Collagen & Biotin Volumising Shampoo, 300 ml'), img('collagen-biotin-shampoo-2', 'Bioxcin Collagen & Biotin shampoo bottle')],
-    benefits: ['Extra Volume technology', 'For hair loss', 'Dermatologically tested, no parabens'],
-    ingredients: ['Collagen', 'Biotin'],
-    howToUse: shampooUse,
-    clinical: ['98% volume, as printed on pack (Extra Volume technology).'],
-    shopSlug: 'bioxcin-collagen-biotin-shampoo-300ml-x-3-box',
-  },
-  {
-    slug: 'collagen-biotin-conditioner',
-    name: 'Collagen & Biotin Volumising Conditioner',
-    category: 'hair-care',
-    family: 'collagen-biotin',
-    type: 'conditioner',
-    needs: ['volume', 'hair-loss'],
-    size: '250 ml',
-    summary: 'Volumising conditioner that strengthens and adds body without weighing hair down.',
-    images: [img('collagen-biotin-conditioner', 'Bioxcin Collagen & Biotin Volumising Conditioner tube')],
-    benefits: ['Extra Volume technology', 'For all hair types', 'Dermatologically tested, no parabens'],
-    ingredients: ['Collagen', 'Biotin'],
-    howToUse: conditionerUse,
-    clinical: ['98% volume, as printed on pack (Extra Volume technology).'],
-    shopSlug: 'bioxcin-collagen-biotin-conditioner',
-  },
-  {
-    slug: 'collagen-biotin-liquid-conditioner',
-    name: 'Collagen & Biotin Liquid Conditioner',
-    category: 'hair-care',
-    family: 'collagen-biotin',
-    type: 'liquid-conditioner',
-    needs: ['volume'],
-    summary: 'Leave-in volumising spray conditioner.',
-    images: [img('collagen-biotin-liquid-conditioner', 'Bioxcin Collagen & Biotin Liquid Conditioner spray'), img('collagen-biotin-liquid-conditioner-2', 'Bioxcin Collagen & Biotin Liquid Conditioner, side view')],
-    benefits: ['Extra Volume technology', 'No rinse', 'For all hair types'],
-    ingredients: ['Collagen', 'Biotin'],
-    howToUse: leaveInUse,
-    clinical: ['98% volume, as printed on pack (Extra Volume technology).'],
-  },
-  {
-    slug: 'collagen-biotin-serum',
-    name: 'Collagen & Biotin Volumising Hair Serum',
-    category: 'hair-care',
-    family: 'collagen-biotin',
-    type: 'serum',
-    needs: ['volume', 'hair-loss'],
-    size: '100 ml',
-    summary: 'Volume boosting hair serum.',
-    images: [img('collagen-biotin-serum', 'Bioxcin Collagen & Biotin Volumising Hair Serum')],
-    benefits: ['Extra Volume technology', 'For hair loss'],
-    ingredients: ['Collagen', 'Biotin'],
-    howToUse: 'Apply to the scalp and roots of clean hair and massage in gently. Do not rinse.',
-  },
-
-  // Hair care: Keratin & Argan
-  {
-    slug: 'keratin-argan-shampoo',
-    name: 'Keratin & Argan Repairing Shampoo',
-    category: 'hair-care',
-    family: 'keratin-argan',
-    type: 'shampoo',
-    needs: ['repair', 'hair-loss'],
-    size: '300 ml',
-    summary: 'Repairing shampoo for damaged hair that is prone to falling out.',
-    images: [img('keratin-argan-shampoo', 'Bioxcin Keratin & Argan Repairing Shampoo, 300 ml')],
-    benefits: ['Extra Repair technology', 'For hair loss', 'Dermatologically tested, no parabens'],
-    ingredients: ['Keratin', 'Argan oil'],
-    howToUse: shampooUse,
-    clinical: ['94% repair, as printed on pack (Extra Repair technology).'],
-    shopSlug: 'bioxcin-keratin-argan-shampoo-300ml-x-3-box',
-  },
-  {
-    slug: 'keratin-argan-conditioner',
-    name: 'Keratin & Argan Repairing Conditioner',
-    category: 'hair-care',
-    family: 'keratin-argan',
-    type: 'conditioner',
-    needs: ['repair'],
-    size: '250 ml',
-    summary: 'Repairing conditioner for damaged, brittle hair.',
-    images: [img('keratin-argan-conditioner', 'Bioxcin Keratin & Argan Repairing Conditioner tube')],
-    benefits: ['Extra Repair technology', 'For all hair types', 'Dermatologically tested, no parabens'],
-    ingredients: ['Keratin', 'Argan oil'],
-    howToUse: conditionerUse,
-    clinical: ['94% repair, as printed on pack (Extra Repair technology).'],
-  },
-  {
-    slug: 'keratin-argan-liquid-conditioner',
-    name: 'Keratin & Argan Liquid Conditioner',
-    category: 'hair-care',
-    family: 'keratin-argan',
-    type: 'liquid-conditioner',
-    needs: ['repair'],
-    summary: 'Leave-in repairing spray conditioner.',
-    images: [img('keratin-argan-liquid-conditioner', 'Bioxcin Keratin & Argan Liquid Conditioner spray'), img('keratin-argan-liquid-conditioner-2', 'Bioxcin Keratin & Argan Liquid Conditioner, alternative view')],
-    benefits: ['Extra Repair technology', 'No rinse', 'For all hair types'],
-    ingredients: ['Keratin', 'Argan oil'],
-    howToUse: leaveInUse,
-    clinical: ['94% repair, as printed on pack (Extra Repair technology).'],
-  },
-  {
-    slug: 'keratin-argan-hair-oil',
-    name: 'Keratin & Argan Repairing Hair Oil',
-    category: 'hair-care',
-    family: 'keratin-argan',
-    type: 'hair-oil',
-    needs: ['repair', 'nourishment'],
-    summary: 'Repairing hair care oil for dry, damaged ends.',
-    images: [img('keratin-argan-oil', 'Bioxcin Keratin & Argan Repairing Hair Oil pump bottle'), img('keratin-argan-oil-2', 'Bioxcin Keratin & Argan Repairing Hair Oil, front')],
-    benefits: ['Extra Repair technology', 'For all hair types'],
-    ingredients: ['Keratin', 'Argan oil'],
-    howToUse: 'Warm a few drops between your palms and apply to damp or dry lengths and ends. Do not rinse.',
-    clinical: ['94% repair, as printed on pack (Extra Repair technology).'],
-  },
-
-  // Hair care: other families
-  {
-    slug: 'biotin-shampoo',
-    name: 'Biotin Shampoo',
-    category: 'hair-care',
-    family: 'biotin',
-    type: 'shampoo',
-    needs: ['hair-loss'],
-    size: '300 ml',
-    summary: 'Daily care shampoo with biotin for healthy hair and scalp, for all hair types.',
-    images: [img('biotin-shampoo', 'Bioxcin Biotin Shampoo, 300 ml')],
-    benefits: ['For all hair types', 'Daily use', 'Hypoallergenic, no parabens'],
-    ingredients: ['Biotin 5000 µg'],
-    howToUse: shampooUse,
-  },
-  {
-    slug: 'caffeine-arginine-shampoo',
-    name: 'Caffeine & Arginine Anti Hair Loss Shampoo',
-    category: 'hair-care',
-    family: 'caffeine-arginine',
-    type: 'shampoo',
-    needs: ['hair-loss'],
-    summary: 'Anti hair loss shampoo with caffeine and arginine.',
-    images: [img('caffeine-arginine-shampoo', 'Bioxcin Caffeine & Arginine Anti Hair Loss Shampoo')],
-    benefits: ['For hair loss', 'Scalp care', 'Dermatologically tested, no parabens'],
-    ingredients: ['Caffeine', 'Arginine'],
-    howToUse: shampooUse,
-  },
-  {
-    slug: 'black-garlic-shampoo',
-    name: 'Black Garlic Shampoo',
-    category: 'hair-care',
-    family: 'black-garlic',
-    type: 'shampoo',
-    needs: ['hair-loss'],
-    size: '300 ml',
-    summary: 'Sulphate-free herbal shampoo with black garlic, for hair loss, for all hair types.',
-    images: [img('black-garlic-shampoo', 'Bioxcin Black Garlic Shampoo, 300 ml')],
-    benefits: ['For hair loss', 'Sulphate free', 'For all hair types', 'Hypoallergenic, no parabens'],
-    ingredients: ['Black garlic extract', 'BioComplex B11'],
-    howToUse: shampooUse,
-  },
-  {
-    slug: 'classic-shampoo-oily-hair',
-    name: 'Classic Herbal Shampoo for Oily Hair',
-    category: 'hair-care',
-    family: 'classic',
-    type: 'shampoo',
-    needs: ['hair-loss', 'oily-hair'],
-    size: '300 ml',
-    summary: 'Herbal shampoo for hair loss, for oily hair.',
-    images: [img('classic-shampoo-oily', 'Bioxcin Classic Herbal Shampoo for oily hair, 300 ml')],
-    benefits: ['For hair loss', 'For oily hair', 'Hypoallergenic, no parabens'],
-    ingredients: ['BioComplex B11', 'Liposome technology', 'Herbal extracts'],
-    howToUse: shampooUse,
-  },
-  {
-    slug: 'quantum-shampoo',
-    name: 'Quantum Bio-Activ Shampoo',
-    category: 'hair-care',
-    family: 'quantum',
-    type: 'shampoo',
-    needs: ['hair-loss', 'volume'],
-    size: '300 ml',
-    summary: 'Shampoo with Bio-Activ peptides, for dry and normal hair.',
-    images: [img('quantum-shampoo', 'Bioxcin Quantum Bio-Activ Shampoo, 300 ml')],
-    benefits: ['For dry and normal hair', 'Dermatologically tested'],
-    ingredients: ['Bio-Activ peptides', 'BioComplex B11'],
-    howToUse: shampooUse,
-  },
-  {
-    slug: 'nourishing-oils-shampoo',
-    name: 'Nourishing Oils Care Shampoo',
-    category: 'hair-care',
-    family: 'nourishing-oils',
-    type: 'shampoo',
-    needs: ['nourishment', 'hair-loss'],
-    summary: 'Sulphate-free care shampoo with nine oils and vitamin B5.',
-    images: [img('nourishing-oils-shampoo', 'Bioxcin Nourishing Oils Care Shampoo')],
-    benefits: ['Sulphate free', 'For hair loss', 'Dermatologically tested, no parabens'],
-    ingredients: ['Blend of 9 oils', 'Vitamin B5'],
-    howToUse: shampooUse,
-  },
-  {
-    slug: 'nourishing-oils-conditioner',
-    name: 'Nourishing Oils Hair Care Conditioner',
-    category: 'hair-care',
-    family: 'nourishing-oils',
-    type: 'conditioner',
-    needs: ['nourishment'],
-    size: '250 ml',
-    summary: 'Nourishing conditioner with nine oils and vitamin B5.',
-    images: [img('nourishing-oils-conditioner', 'Bioxcin Nourishing Oils Hair Care Conditioner tube')],
-    benefits: ['For dry hair', 'Dermatologically tested'],
-    ingredients: ['Blend of 9 oils', 'Vitamin B5'],
-    howToUse: conditionerUse,
-  },
-  {
-    slug: 'nourishing-oils-liquid-conditioner',
-    name: 'Nourishing Oils Liquid Conditioner',
-    category: 'hair-care',
-    family: 'nourishing-oils',
-    type: 'liquid-conditioner',
-    needs: ['nourishment'],
-    summary: 'Leave-in nourishing spray conditioner.',
-    images: [img('nourishing-oils-liquid-conditioner', 'Bioxcin Nourishing Oils Liquid Conditioner spray')],
-    benefits: ['No rinse', 'For dry hair'],
-    ingredients: ['Blend of 9 oils', 'Vitamin B5'],
-    howToUse: leaveInUse,
-  },
-  {
-    slug: 'nourishing-oils-hair-oil',
-    name: 'Nourishing Oils Hair Care Oil',
-    category: 'hair-care',
-    family: 'nourishing-oils',
-    type: 'hair-oil',
-    needs: ['nourishment'],
-    summary: 'Nourishing hair care oil with nine oils and vitamin B5.',
-    images: [img('nourishing-oils-hair-oil', 'Bioxcin Nourishing Oils Hair Care Oil pump bottle')],
-    benefits: ['For dry hair', 'Shine and softness'],
-    ingredients: ['Blend of 9 oils', 'Vitamin B5'],
-    howToUse: 'Warm a few drops between your palms and apply to damp or dry lengths and ends. Do not rinse.',
-  },
-  {
-    slug: 'nourishing-oils-hair-mask',
-    name: 'Nourishing Oils Hair Mask',
-    category: 'hair-care',
-    family: 'nourishing-oils',
-    type: 'mask',
-    needs: ['nourishment', 'repair'],
-    summary: 'Nourishing hair care mask.',
-    images: [img('nourishing-oils-mask', 'Bioxcin Nourishing Oils Hair Mask jar')],
-    benefits: ['For dry hair', 'Intensive care'],
-    ingredients: ['Blend of 9 oils'],
-    howToUse: 'After shampooing, apply to the lengths and ends of damp hair. Leave for 5 to 10 minutes, then rinse well.',
-  },
-  {
-    slug: 'eyelash-eyebrow-serum',
-    name: 'Eyelash and Eyebrow Serum',
-    category: 'hair-care',
-    family: 'brow-lash-serum',
-    type: 'serum',
-    needs: ['brows-lashes'],
-    summary: 'Serum pen for eyelashes and eyebrows.',
-    images: [img('brow-lash-serum', 'Bioxcin Eyelash and Eyebrow Serum pen')],
-    benefits: ['For lashes and brows', 'Precise brush applicator'],
-    ingredients: ['Lash and brow care complex'],
-    howToUse: 'Apply a thin line to clean, dry lash roots and brows once a day, ideally in the evening. Avoid contact with the eyes.',
-  },
-
-  // Skin care
-  {
-    slug: 'hydra-moisturising-cream-normal-dry',
-    name: 'Hydra Moisturising Face Cream, normal to dry skin',
-    category: 'skin-care',
-    family: 'hydra',
-    type: 'face-cream',
-    needs: ['hydration'],
-    summary: 'Moisturising face cream for normal to dry skin.',
-    images: [img('hydra-cream-normal-dry', 'Bioxcin Hydra Moisturising Face Cream tube for normal to dry skin')],
-    benefits: ['For normal to dry skin', 'Daily moisture'],
-    ingredients: ['Thermal water', 'Botanical actives'],
-    howToUse: 'Apply morning and evening to clean face and neck, and massage in gently.',
-  },
-  {
-    slug: 'hydra-moisturising-cream-oily',
-    name: 'Hydra Moisturising Face Cream, oily skin',
-    category: 'skin-care',
-    family: 'hydra',
-    type: 'face-cream',
-    needs: ['hydration', 'acne'],
-    summary: 'Lightweight moisturising face cream for oily skin.',
-    images: [img('hydra-cream-oily', 'Bioxcin Hydra Moisturising Face Cream tubes for oily skin')],
-    benefits: ['For oily skin', 'Lightweight texture'],
-    ingredients: ['Thermal water', 'Botanical actives'],
-    howToUse: 'Apply morning and evening to clean face and neck, and massage in gently.',
-  },
-  {
-    slug: 'hydra-toner',
-    name: 'Hydra Toner',
-    category: 'skin-care',
-    family: 'hydra',
-    type: 'toner',
-    needs: ['hydration'],
-    summary: 'Hydrating face toner.',
-    images: [],
-    benefits: ['Hydrating', 'Prepares skin for serum and cream'],
-    ingredients: ['Thermal water'],
-    howToUse: 'After cleansing, apply with a cotton pad to face and neck, morning and evening.',
-    shopSlug: 'bioxcin-hydra-toner',
-  },
-  {
-    slug: 'hydra-micellar-water',
-    name: 'Hydra Micellar Water',
-    category: 'skin-care',
-    family: 'hydra',
-    type: 'toner',
-    needs: ['hydration'],
-    summary: 'Micellar water that cleanses and removes make-up.',
-    images: [],
-    benefits: ['Removes make-up', 'Hydrating'],
-    ingredients: ['Thermal water'],
-    howToUse: 'Apply with a cotton pad to face, eyes and lips. No rinsing needed.',
-    shopSlug: 'bioxcin-hydra-micellar-water',
-  },
-  {
-    slug: 'hydra-cleansing-gel',
-    name: 'Hydra Cleansing Gel',
-    category: 'skin-care',
-    family: 'hydra',
-    type: 'cleanser',
-    needs: ['hydration'],
-    summary: 'Gentle hydrating face cleansing gel.',
-    images: [],
-    benefits: ['Gentle daily cleansing', 'Hydrating'],
-    ingredients: ['Thermal water'],
-    howToUse: 'Lather with water on damp skin, massage gently, then rinse. Use morning and evening.',
-    shopSlug: 'bioxcin-hydra-cleansin-gel',
-  },
-  {
-    slug: 'ester-vitamin-c-15-serum',
-    name: 'Skin Expert Ester Vitamin C 15% Serum',
-    category: 'skin-care',
-    family: 'skin-expert',
-    type: 'serum',
-    needs: ['dark-spots'],
-    summary: 'Vitamin C face serum for radiance.',
-    images: [img('vitamin-c-serum', 'Bioxcin Skin Expert Ester Vitamin C 15% serum, amber dropper bottle')],
-    benefits: ['Radiance', 'For uneven-looking skin tone'],
-    ingredients: ['Ester vitamin C 15%'],
-    howToUse: 'Apply a few drops to clean, dry skin in the morning before moisturiser. Follow with sun protection.',
-  },
-  {
-    slug: 'hyaluronic-acid-3-serum',
-    name: 'Skin Expert Hyaluronic Acid 3% Serum',
-    category: 'skin-care',
-    family: 'skin-expert',
-    type: 'serum',
-    needs: ['hydration'],
-    summary: 'Intense moisture plumping serum.',
-    images: [img('hyaluronic-acid-serum', 'Bioxcin Skin Expert Hyaluronic Acid 3% serum, amber dropper bottle')],
-    benefits: ['Intense moisture', 'Plumping'],
-    ingredients: ['Hyaluronic acid 3%'],
-    howToUse: 'Apply a few drops to clean skin, morning and evening, before moisturiser.',
-  },
-  {
-    slug: 'acnium-cleansing-gel',
-    name: 'Acnium Cleansing Gel',
-    category: 'skin-care',
-    family: 'acnium',
-    type: 'cleanser',
-    needs: ['acne'],
-    size: '500 ml',
-    summary: 'Cleansing gel for acne-prone, oily and combination skin.',
-    images: [img('acnium-cleansing-gel', 'Bioxcin Acnium Cleansing Gel, 500 ml pump bottle')],
-    benefits: ['For acne-prone skin', 'For oily and combination skin', 'Dermatologically tested'],
-    ingredients: ['Acnium Herbal Complex', 'Thermal water'],
-    howToUse: 'Lather with water on damp skin, massage gently, then rinse. Use morning and evening.',
-  },
-  {
-    slug: 'age-reverse-anti-wrinkle-gold-cream',
-    name: 'Age Reverse Anti-Wrinkle Gold Cream',
-    category: 'skin-care',
-    family: 'age-reverse',
-    type: 'face-cream',
-    needs: ['anti-ageing'],
-    size: '50 ml',
-    summary: 'Anti-wrinkle face cream for all skin types.',
-    images: [img('age-reverse-gold-cream', 'Bioxcin Age Reverse Anti-Wrinkle Gold Cream jar')],
-    benefits: ['Anti-wrinkle', 'For all skin types'],
-    ingredients: ['Filling and firming complex'],
-    howToUse: 'Apply to clean face and neck and massage in with upward movements.',
-    shopSlug: 'bioxcin-cream-age-reverse-anti-wrinkle-gold-cream-50ml',
-  },
-  {
-    slug: 'age-reverse-anti-wrinkle-cream',
-    name: 'Age Reverse Anti-Wrinkle Cream',
-    category: 'skin-care',
-    family: 'age-reverse',
-    type: 'face-cream',
-    needs: ['anti-ageing'],
-    size: '50 ml',
-    summary: 'Anti-wrinkle face cream for all skin types.',
-    images: [img('age-reverse-cream', 'Bioxcin Age Reverse Anti-Wrinkle Cream, blue jar')],
-    benefits: ['Anti-wrinkle', 'For all skin types'],
-    ingredients: ['Filling and firming complex'],
-    howToUse: 'Apply in the evening to clean face and neck and massage in with upward movements.',
-    shopSlug: 'bioxcin-cream-age-reverse-anti-wrinkle-cream-50ml',
-  },
-  {
-    slug: 'age-reverse-anti-wrinkle-serum',
-    name: 'Age Reverse Anti-Wrinkle Serum',
-    category: 'skin-care',
-    family: 'age-reverse',
-    type: 'serum',
-    needs: ['anti-ageing'],
-    size: '30 ml',
-    summary: 'Filling and firming anti-wrinkle serum.',
-    images: [img('age-reverse-serum', 'Bioxcin Age Reverse Anti-Wrinkle Serum, blue dropper bottle')],
-    benefits: ['Filling and firming', 'Anti-wrinkle'],
-    ingredients: ['Filling and firming complex'],
-    howToUse: 'Apply a few drops to clean skin before your cream, morning and evening.',
-    shopSlug: 'bioxcin-serum-age-reverse-anti-wrinkle-serum-30ml',
-  },
-  {
-    slug: 'age-reverse-night-eye-cream',
-    name: 'Age Reverse Night Anti-Wrinkle Eye Cream',
-    category: 'skin-care',
-    family: 'age-reverse',
-    type: 'eye-cream',
-    needs: ['anti-ageing'],
-    size: '15 ml',
-    summary: 'Night anti-wrinkle eye cream with retinol, caffeine and hyaluronic acid.',
-    images: [img('age-reverse-eye-cream', 'Bioxcin Age Reverse Night Anti-Wrinkle Eye Cream tube')],
-    benefits: ['Filling and firming', 'For the eye area'],
-    ingredients: ['Retinol', 'Caffeine', 'Hyaluronic acid'],
-    howToUse: 'In the evening, pat a small amount gently around the eye area. Avoid contact with the eyes.',
-    shopSlug: 'bioxcin-eye-cream-age-reverse-eye-cream-15ml',
-  },
-  {
-    slug: 'atopicare-nourishing-cream',
-    name: 'Atopicare Nourishing Cream',
-    category: 'skin-care',
-    family: 'atopicare',
-    type: 'body',
-    needs: ['sensitive'],
-    summary: 'Nourishing cream for atopic-prone, very dry and sensitive skin.',
-    images: [img('atopicare-cream', 'Bioxcin Atopicare Nourishing Cream, pump bottle')],
-    benefits: ['For atopic-prone skin', 'For very dry and sensitive skin', 'Suitable for the whole family'],
-    ingredients: ['Patented skin barrier formula', 'Thermal water'],
-    howToUse: 'Apply to clean skin once or twice a day, or as often as needed.',
-  },
-  {
-    slug: 'sun-care-stick-spf-50',
-    name: 'Sun Care Stick SPF 50+',
-    category: 'skin-care',
-    family: 'sun-care',
-    type: 'sun-cream',
-    needs: ['sun-protection'],
-    summary: 'Very high protection sun stick for face and sensitive areas.',
-    images: [img('sun-stick', 'Bioxcin Sun Care Stick SPF 50+')],
-    benefits: ['SPF 50+', 'For all skin types', 'Easy to carry'],
-    ingredients: ['Broad-spectrum UV filters'],
-    howToUse: sunUse,
-    shopSlug: 'bioxcin-sun-care-stick-spf-50',
-  },
-  {
-    slug: 'sun-care-cream-sensitive-skin-spf-50',
-    name: 'Sun Care Cream for Sensitive Skin SPF 50+',
-    category: 'skin-care',
-    family: 'sun-care',
-    type: 'sun-cream',
-    needs: ['sun-protection', 'sensitive'],
-    summary: 'Very high protection sun cream for sensitive skin.',
-    images: [img('sun-cream-sensitive', 'Bioxcin Sun Care Cream SPF 50+ for sensitive skin, tube')],
-    benefits: ['SPF 50+', 'For sensitive skin', 'Soothing and moisturising'],
-    ingredients: ['Hybrid filter system', 'Thermal water'],
-    howToUse: sunUse,
-  },
-  {
-    slug: 'sun-care-cream-dry-normal-skin-spf-50',
-    name: 'Sun Care Cream for Dry and Normal Skin SPF 50+',
-    category: 'skin-care',
-    family: 'sun-care',
-    type: 'sun-cream',
-    needs: ['sun-protection'],
-    summary: 'Very high protection sun cream for dry and normal skin.',
-    images: [],
-    benefits: ['SPF 50+', 'For dry and normal skin'],
-    ingredients: ['Broad-spectrum UV filters', 'Thermal water'],
-    howToUse: sunUse,
-    shopSlug: 'bioxcin-sun-care-dry-normal-skin-cream-spf-50',
-  },
-  {
-    slug: 'sun-care-cream-oily-skin-spf-50',
-    name: 'Sun Care Cream for Oily Skin SPF 50+',
-    category: 'skin-care',
-    family: 'sun-care',
-    type: 'sun-cream',
-    needs: ['sun-protection', 'acne'],
-    summary: 'Very high protection sun cream for oily skin.',
-    images: [img('sun-cream-oily', 'Bioxcin Sun Care Cream SPF 50+ for oily skin, tube')],
-    benefits: ['SPF 50+', 'For oily skin'],
-    ingredients: ['Broad-spectrum UV filters', 'Thermal water'],
-    howToUse: sunUse,
-  },
-  {
-    slug: 'sun-care-melatone-spf-50',
-    name: 'Sun Care Melatone Cream SPF 50+',
-    category: 'skin-care',
-    family: 'sun-care',
-    type: 'sun-cream',
-    needs: ['sun-protection', 'dark-spots'],
-    summary: 'Very high protection sun cream for skin prone to dark spots.',
-    images: [img('sun-cream-melatone', 'Bioxcin Sun Care Melatone Cream SPF 50+, tube')],
-    benefits: ['SPF 50+', 'For skin prone to dark spots'],
-    ingredients: ['Broad-spectrum UV filters', 'Thermal water'],
-    howToUse: sunUse,
-  },
-  {
-    slug: 'sun-care-kids-mineral-spf-50',
-    name: 'Sun Care Kids Mineral Sun Cream SPF 50+',
-    category: 'skin-care',
-    family: 'sun-care',
-    type: 'sun-cream',
-    needs: ['sun-protection', 'sensitive'],
-    size: '100 ml',
-    summary: 'Mineral sun cream for babies and children with sensitive skin.',
-    images: [img('sun-cream-kids', 'Bioxcin Sun Care Kids Mineral Sun Cream SPF 50+, tube')],
-    benefits: ['SPF 50+', '100% mineral filter', 'For babies and children', 'Water resistant'],
-    ingredients: ['Mineral UV filters'],
-    howToUse: sunUse,
-  },
-  {
-    slug: 'gold-on-skin-dry-oil',
-    name: 'Gold On Skin Dry Oil',
-    category: 'skin-care',
-    family: 'gold-on-skin',
-    type: 'body',
-    needs: ['hydration'],
-    size: '100 ml',
-    summary: 'Dry oil for face, body and hair.',
-    images: [img('gold-on-skin-dry-oil', 'Bioxcin Gold On Skin Dry Oil, 100 ml glass bottle')],
-    benefits: ['Face, body and hair', 'Moisturises, nourishes and shines'],
-    ingredients: ['Miracle flowers oil blend'],
-    howToUse: 'Spray onto face, body or hair and smooth in. Can be used daily.',
-  },
-
-  // Food supplements
-  {
-    slug: 'keratin-complex-tablets',
-    name: 'Keratin Complex Tablets',
-    category: 'supplements',
-    family: 'keratin',
-    type: 'tablet',
-    needs: ['hair'],
-    size: '60 tablets',
-    summary: 'Food supplement with keratin, amino acids, biotin and zinc.',
-    images: [img('keratin-complex', 'Bioxcin Keratin Complex, 60 tablet bottle')],
-    benefits: ['Supports hair', 'Gluten and sugar free'],
-    ingredients: ['Keratin 500 mg', 'Amino acids', 'Biotin', 'Zinc'],
-    howToUse: 'Follow the dose on the pack. Food supplements are not a substitute for a varied diet. Do not exceed the stated dose.',
-  },
-  {
-    slug: 'collagen-beauty-sport',
-    name: 'Collagen Beauty Sport',
-    category: 'supplements',
-    family: 'collagen-powder',
-    type: 'powder',
-    needs: ['active', 'skin'],
-    summary: 'Collagen powder supplement for an active lifestyle.',
-    images: [img('collagen-sport', 'Bioxcin Collagen Beauty Sport powder tub')],
-    benefits: ['Collagen powder', 'Mix into a drink'],
-    ingredients: ['Collagen'],
-    howToUse: 'Follow the dose on the pack. Food supplements are not a substitute for a varied diet. Do not exceed the stated dose.',
-  },
-  {
-    slug: 'collagen-beauty-powder',
-    name: 'Collagen Beauty Powder Sachets',
-    category: 'supplements',
-    family: 'collagen-powder',
-    type: 'powder',
-    needs: ['skin'],
-    size: '30 × 11 g',
-    summary: 'Collagen powder supplement in single-serve sachets.',
-    images: [],
-    benefits: ['Collagen powder', 'Single-serve sachets'],
-    ingredients: ['Collagen'],
-    howToUse: 'Follow the dose on the pack. Food supplements are not a substitute for a varied diet. Do not exceed the stated dose.',
-    shopSlug: 'bioxcin-powder-beauty-collagen-powder-satchet-30x11gr',
   },
 ]
 
@@ -941,18 +281,21 @@ export const getCategory = (slug: string) => categories.find((c) => c.slug === s
 
 export const getFamily = (category: Category, slug: string) => category.families.find((f) => f.slug === slug)
 
-export const productsIn = (categorySlug: string, familySlug?: string) =>
-  products.filter((p) => p.category === categorySlug && (!familySlug || p.family === familySlug))
-
-export const getProduct = (categorySlug: string, familySlug: string, slug: string) =>
-  products.find((p) => p.category === categorySlug && p.family === familySlug && p.slug === slug)
-
-export const findProduct = (slug: string) => products.find((p) => p.slug === slug)
-
 export const productHref = (p: Pick<Product, 'category' | 'family' | 'slug'>) => `/${p.category}/${p.family}/${p.slug}`
 
-export const familyOf = (p: Product) => getFamily(getCategory(p.category)!, p.family)!
+export const familyOf = (p: Pick<Product, 'category' | 'family'>) => getFamily(getCategory(p.category)!, p.family)!
 
-/** Families with at least one product; empty families stay reachable but are not promoted. */
-export const familiesWithProducts = (category: Category) =>
+export const productsIn = (products: Product[], categorySlug: string, familySlug?: string) =>
+  products.filter((p) => p.category === categorySlug && (!familySlug || p.family === familySlug))
+
+/** Families that have at least one product in the shop. Families without products are not shown. */
+export const familiesWithProducts = (products: Product[], category: Category) =>
   category.families.filter((f) => products.some((p) => p.category === category.slug && p.family === f.slug))
+
+/** Price actually charged: the sale price when there is a real discount, otherwise the regular price. */
+export const displayPrice = (p: Pick<Product, 'price' | 'salePrice'>) =>
+  p.salePrice !== null && p.salePrice > 0 && p.salePrice < p.price ? p.salePrice : p.price
+
+/** Same formatting as the Eloria shop: "Ksh 1,975". */
+export const formatPrice = (value: number) =>
+  new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', maximumFractionDigits: 0 }).format(value)

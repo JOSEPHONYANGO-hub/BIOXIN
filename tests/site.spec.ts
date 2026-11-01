@@ -38,15 +38,23 @@ test('unknown pages return 404', async ({ page }) => {
   expect(res?.status()).toBe(404)
 })
 
-test('Buy now appears only for products the shop sells, without naming the shop', async ({ page }) => {
+test('product pages show the shop sale price and a Buy now link that does not name the shop', async ({ page }) => {
   await page.goto('/hair-care/forte/forte-serum')
-  const buy = page.getByRole('link', { name: /Buy now/ })
+  const buy = page.getByRole('link', { name: /Buy now.*Forte Herbal Serum \(/ })
   await expect(buy).toHaveCount(1)
   await expect(buy).toHaveAttribute('href', /^https:\/\/eloriabeauty\.co\.ke\/products\/bioxcin-forte-serum-50-ml\?utm_source=bioxcin\.co\.ke/)
   await expect(buy).not.toContainText(/eloria/i)
+  const main = page.locator('main')
+  // Same figures as the shop: Ksh 1,275 after discount, Ksh 2,550 before.
+  await expect(main.getByText('Ksh 1,275').first()).toBeVisible()
+  await expect(main.getByText('Ksh 2,550').first()).toBeVisible()
+})
 
-  await page.goto('/hair-care/black-garlic/black-garlic-shampoo')
-  await expect(page.getByRole('link', { name: /Buy now/ })).toHaveCount(0)
+test('only products sold on the shop are listed', async ({ page }) => {
+  await page.goto('/supplements')
+  await expect(page.locator('#products article')).toHaveCount(1)
+  const res = await page.goto('/supplements/keratin/keratin-complex-tablets')
+  expect(res?.status()).toBe(404)
 })
 
 test('product pages offer a pre-filled WhatsApp enquiry', async ({ page }) => {

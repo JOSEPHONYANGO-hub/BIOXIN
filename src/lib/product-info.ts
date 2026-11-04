@@ -190,12 +190,8 @@ export const productInfo: Record<string, ProductInfo> = {
     "summary": "Volumising shampoo for hair loss, for fine hair that needs body.",
     "images": [
       {
-        "src": "/images/products/collagen-biotin-shampoo.webp",
-        "alt": "Bioxcin Collagen & Biotin Volumising Shampoo, 300 ml"
-      },
-      {
-        "src": "/images/products/collagen-biotin-shampoo-2.webp",
-        "alt": "Bioxcin Collagen & Biotin shampoo bottle"
+        "src": "/images/products/collagen-biotin-shampoo-box.webp",
+        "alt": "Bioxcin Collagen & Biotin Volumising Shampoo, box of 3 × 300 ml"
       }
     ],
     "benefits": [
@@ -353,8 +349,8 @@ export const productInfo: Record<string, ProductInfo> = {
     "summary": "Repairing shampoo for damaged hair that is prone to falling out.",
     "images": [
       {
-        "src": "/images/products/keratin-argan-shampoo.webp",
-        "alt": "Bioxcin Keratin & Argan Repairing Shampoo, 300 ml"
+        "src": "/images/products/keratin-argan-shampoo-box.webp",
+        "alt": "Bioxcin Keratin & Argan Repairing Shampoo, box of 3 × 300 ml"
       }
     ],
     "benefits": [
